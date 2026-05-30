@@ -9,10 +9,10 @@ const SIGNAL_ICON: Record<string, string> = {
   NEUTRAL: "→",
 };
 
-const SIGNAL_COLOR: Record<string, string> = {
-  BULLISH: "text-[#00ff41]",
-  BEARISH: "text-[#ff3333]",
-  NEUTRAL: "text-[#666]",
+const SIGNAL_CLASS: Record<string, string> = {
+  BULLISH: "signal-bullish",
+  BEARISH: "signal-bearish",
+  NEUTRAL: "signal-neutral",
 };
 
 interface Props {
@@ -24,32 +24,13 @@ interface Props {
 
 function SourceBadge({ card }: { card: WireCard }) {
   if (card.failed) return null;
-  if (card.fromWireCache) {
-    return (
-      <span className="rounded border border-[#ffb000]/50 bg-[#ffb000]/10 px-1 py-0.5 text-[8px] font-bold tracking-wider text-[#ffb000]">
-        WIRE CACHE
-      </span>
-    );
-  }
-  if (card.isFallback) {
-    return (
-      <span className="rounded border border-[#ffb000]/50 bg-[#ffb000]/10 px-1 py-0.5 text-[8px] font-bold tracking-wider text-[#ffb000]">
-        FALLBACK
-      </span>
-    );
-  }
-  if (card.isLive) {
-    return (
-      <span className="pulse-live rounded border border-[#00ff41]/50 bg-[#00ff41]/10 px-1 py-0.5 text-[8px] font-bold tracking-wider text-[#00ff41]">
-        LIVE
-      </span>
-    );
-  }
-  return (
-    <span className="rounded border border-[#666]/50 bg-[#111] px-1 py-0.5 text-[8px] font-bold tracking-wider text-[#888]">
-      CACHED
-    </span>
-  );
+  if (card.fromWireCache)
+    return <span className="badge badge-fallback">WIRE CACHE</span>;
+  if (card.isFallback)
+    return <span className="badge badge-fallback">FALLBACK</span>;
+  if (card.isLive)
+    return <span className="badge badge-live pulse-live">LIVE</span>;
+  return <span className="badge badge-cached">CACHED</span>;
 }
 
 export function SourceCard({ card, index, accent = "green", onRetry }: Props) {
@@ -59,62 +40,64 @@ export function SourceCard({ card, index, accent = "green", onRetry }: Props) {
     );
   }
 
-  const borderAccent =
-    accent === "amber" ? "border-[#ffb000]/30" : "border-[#00ff41]/30";
-  const labelColor = accent === "amber" ? "text-[#ffb000]" : "text-[#00ff41]";
+  const isAmber = accent === "amber";
+  const cardClass = isAmber
+    ? "wire-card wire-card-amber card-arrive"
+    : "wire-card card-arrive";
+  const labelClass = isAmber ? "t-label text-[#ffb000]" : "t-label text-[#00ff41]";
 
   return (
     <article
-      className={`card-arrive border ${borderAccent} bg-[#0a0a0a] p-2`}
+      className={cardClass}
       style={{ animationDelay: `${index * 80}ms` }}
     >
-      <div className="mb-1 flex items-center justify-between gap-2">
-        <span className={`text-[10px] font-bold tracking-wider ${labelColor}`}>
+      {/* Header row */}
+      <div className="mb-2 flex items-center justify-between gap-2">
+        <span className={labelClass}>
           [{card.wireId.toUpperCase()}]
         </span>
-        <div className="flex items-center gap-1.5">
-          <span
-            className={`text-xs font-bold ${SIGNAL_COLOR[card.signal ?? "NEUTRAL"]}`}
-            title={card.signal ?? "NEUTRAL"}
-          >
+        <div className="flex items-center gap-2">
+          <span className={`text-xs ${SIGNAL_CLASS[card.signal ?? "NEUTRAL"]}`}>
             {SIGNAL_ICON[card.signal ?? "NEUTRAL"]} {card.signal ?? "NEUTRAL"}
           </span>
           <SourceBadge card={card} />
         </div>
       </div>
 
+      {/* Wire label */}
       {card.label && (
-        <p className="mb-1 text-[8px] text-[#444]">{card.label}</p>
+        <p className="mb-1.5 text-[9px] tracking-wider text-[#444]">
+          {card.label}
+        </p>
       )}
 
-      <p className="mb-2 text-[10px] text-[#888]">{card.summary}</p>
+      {/* Summary */}
+      <p className="t-summary mb-2.5">{card.summary}</p>
 
-      <div className="space-y-0.5 border-t border-[#222] pt-1">
+      {/* Metrics */}
+      <div className="border-t border-[#1a1a1a] pt-2 space-y-0.5">
         {card.metrics.map((row) => (
-          <div key={row.label} className="flex justify-between text-[9px]">
-            <span className="text-[#555]">{row.label}</span>
-            <span className="text-[#aaa]">{row.value}</span>
+          <div key={row.label} className="metric-row">
+            <span className="t-metric-label">{row.label}</span>
+            <span className="t-metric-value">{row.value}</span>
           </div>
         ))}
       </div>
 
+      {/* Evidence links */}
       {card.evidenceLinks && card.evidenceLinks.length > 0 && (
-        <div className="mt-2 space-y-0.5 border-t border-[#222] pt-1">
+        <div className="mt-2 space-y-1 border-t border-[#1a1a1a] pt-2">
           {card.evidenceLinks.slice(0, 3).map((url) => (
             <a
               key={url}
               href={url}
               target="_blank"
               rel="noopener noreferrer"
-              className="block truncate text-[8px] text-[#00ff41] underline hover:text-[#ffb000]"
+              className="t-evidence block truncate"
             >
-              View source →{" "}
-              {(() => {
-                try {
-                  return new URL(url).hostname;
-                } catch {
-                  return url.slice(0, 32);
-                }
+              ↗ {(() => {
+                try { return new URL(url).hostname; }
+                catch { return url.slice(0, 36); }
               })()}
             </a>
           ))}
