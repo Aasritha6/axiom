@@ -47,62 +47,215 @@ Axiom does not ask users to trust a model. It shows what each wire returned, how
 
 ## Architecture
 
-### System overview
+### Full system diagram
 
-```mermaid
-flowchart TB
-    subgraph Client["Browser (React 19)"]
-        UI["Terminal UI"]
-        ES["EventSource Client"]
-    end
-
-    subgraph Server["Next.js App Router"]
-        SSE["/api/axiom/stream"]
-        VE["Verdict Engine"]
-        EX["Extractors"]
-        GC["Gemini Synthesis (optional)"]
-    end
-
-    subgraph Anakin["Anakin Wire API"]
-        W1["gn_search"]
-        W2["gn_related"]
-        W3["rt_search"]
-        W4["yt_search"]
-        W5["yf_quote"]
-        W6["am_search_products"]
-        W7["gh_search_repos"]
-        W8["yc_search_companies"]
-    end
-
-    UI --> ES
-    ES <-->|SSE| SSE
-    SSE --> W1 & W2 & W3 & W4 & W5 & W6 & W7 & W8
-    SSE --> EX --> VE
-    VE --> GC
-    SSE -->|wire_resolved / final_verdict| ES
+```
+┌─────────────────────────────────────────────────────────────────────────────────────────┐
+│                              PRESENTATION LAYER (Browser)                               │
+├─────────────────────────────────────────────────────────────────────────────────────────┤
+│                                                                                         │
+│   ┌─────────────────────────────────────────────────────────────────────────────────┐   │
+│   │                           AXIOM TERMINAL UI (React 19)                          │   │
+│   │                                                                                 │   │
+│   │  ┌──────────────────────┐  ┌──────────────────────┐  ┌──────────────────────┐  │   │
+│   │  │  📢 NARRATIVE MATRIX │  │  🎯 FORENSIC SYNTHESIS │  │ 🌍 REALITY ATOMIZER  │  │   │
+│   │  │  (Left Panel)        │  │  (Center Panel)       │  │  (Right Panel)       │  │   │
+│   │  │                      │  │                       │  │                      │  │   │
+│   │  │  • SourceCard        │  │  • Δ-Sigma Gauge      │  │  • SourceCard        │  │   │
+│   │  │  • WireSkeleton      │  │  • Signal Bars        │  │  • WireSkeleton      │  │   │
+│   │  │  • FailedWireCard    │  │  • Verdict Label      │  │  • FailedWireCard    │  │   │
+│   │  │  • Evidence links    │  │  • Copy Verdict       │  │  • Evidence links    │  │   │
+│   │  └──────────┬───────────┘  └───────────┬───────────┘  └──────────┬───────────┘  │   │
+│   │             │                          │                          │              │   │
+│   │  ┌──────────┴──────────────────────────┴──────────────────────────┴───────────┐  │   │
+│   │  │  Header: Query Input · Featured Carousel (Cached / Live) · Source Stats     │  │   │
+│   │  └───────────────────────────────────────────────────────────────────────────┘  │   │
+│   └───────────────────────────────────────┬─────────────────────────────────────────┘   │
+│                                           │                                             │
+│                               EventSource │  (SSE client)                               │
+│                                           ▼                                             │
+└───────────────────────────────────────────┼─────────────────────────────────────────────┘
+                                            │
+                          GET /api/axiom/stream?query=...&live=0|1
+                                            │
+┌───────────────────────────────────────────┼─────────────────────────────────────────────┐
+│                              APPLICATION LAYER (Next.js 15)                               │
+├───────────────────────────────────────────┼─────────────────────────────────────────────┤
+│                                           ▼                                             │
+│   ┌─────────────────────────────────────────────────────────────────────────────────┐   │
+│   │                     SSE STREAM DISPATCHER  (route.ts)                           │   │
+│   │                                                                                 │   │
+│   │   ┌─────────────┐    ┌─────────────┐    ┌─────────────┐    ┌─────────────┐     │   │
+│   │   │ Demo Mode?  │───▶│ Wire Cache  │───▶│  Parallel   │───▶│  Extractors │     │   │
+│   │   │ (curated)   │    │ (2h TTL)    │    │  Dispatch   │    │  (per slug) │     │   │
+│   │   └─────────────┘    └─────────────┘    └──────┬──────┘    └──────┬──────┘     │   │
+│   │                                                 │                   │            │   │
+│   │                                                 │                   ▼            │   │
+│   │                                                 │         ┌─────────────────┐  │   │
+│   │                                                 │         │ Verdict Engine  │  │   │
+│   │                                                 │         │ (discrepancy.ts)│  │   │
+│   │                                                 │         └────────┬────────┘  │   │
+│   │                                                 │                  │           │   │
+│   │                                                 │                  ▼           │   │
+│   │                                                 │         ┌─────────────────┐  │   │
+│   │                                                 │         │ Gemini (opt.)   │  │   │
+│   │                                                 │         │ (gemini.ts)     │  │   │
+│   │                                                 │         └────────┬────────┘  │   │
+│   │                                                 │                  │           │   │
+│   │   SSE Events emitted:                           │                  │           │   │
+│   │   • status          • wire_resolved             │                  │           │   │
+│   │   • wire_failed     • final_verdict             │                  │           │   │
+│   └─────────────────────────────────────────────────┼──────────────────┼───────────┘   │
+│                                                     │                  │               │
+└─────────────────────────────────────────────────────┼──────────────────┼───────────────┘
+                                                      │                  │
+                                                      ▼                  │
+┌─────────────────────────────────────────────────────────────────────────┼───────────────┐
+│                              DATA LAYER (Anakin Wire + Fallbacks)       │               │
+├─────────────────────────────────────────────────────────────────────────┼───────────────┤
+│                                                                         │               │
+│   ┌────────────────────────────── NARRATIVE (×4) ──────────────────────────────────┐  │
+│   │                                                                                 │  │
+│   │   gn_search          gn_related         rt_search          yt_search           │  │
+│   │   Google News        Related Stories    Reddit Posts       YouTube Videos      │  │
+│   │   (google_news)      (google_news)      (reddit)           (youtube)           │  │
+│   │                                                                                 │  │
+│   └─────────────────────────────────────────────────────────────────────────────────┘  │
+│                                                                         │               │
+│   ┌────────────────────────────── REALITY (×4) ────────────────────────────────────┐  │
+│   │                                                                                 │  │
+│   │   yf_quote           am_search_products  gh_search_repos   yc_search_companies  │  │
+│   │   Yahoo Finance      Amazon Products     GitHub Repos      YC Hiring           │  │
+│   │   (yahoo_finance)    (amazon)            (github)          (ycombinator)       │  │
+│   │                                                                                 │  │
+│   └─────────────────────────────────────────────────────────────────────────────────┘  │
+│                                                                         │               │
+│   ┌────────────────────────────── FALLBACKS (on Wire failure) ─────────────────────┐  │
+│   │   rt_search  ──▶  Reddit Public JSON API                                          │  │
+│   │   yf_quote   ──▶  Yahoo Finance Chart API                                        │  │
+│   └──────────────────────────────────────────────────────────────────────────────────┘  │
+│                                                                                         │
+│   Anakin API:  POST https://anakin.io/v1/wire/task   →   GET /v1/wire/jobs/{id}       │
+│   Auth:        X-API-Key header                                                         │
+└─────────────────────────────────────────────────────────────────────────────────────────┘
 ```
 
-### Split-brain data model
+### Data flow (single query)
 
-```mermaid
-flowchart LR
-    subgraph Narrative["📢 Narrative Hemisphere"]
-        N1["Google News Search"]
-        N2["Related Coverage"]
-        N3["Reddit Search"]
-        N4["YouTube Search"]
-    end
+```
+  USER                    SERVER                         EXTERNAL
+   │                         │                              │
+   │  Enter "Byju's"         │                              │
+   │────────────────────────▶│                              │
+   │                         │                              │
+   │                         │  ┌─ gn_search ──────────────▶│ Anakin Wire
+   │                         │  ├─ gn_related ────────────▶│ Anakin Wire
+   │                         │  ├─ rt_search ─────────────▶│ Anakin Wire
+   │                         │  ├─ yt_search ─────────────▶│ Anakin Wire
+   │                         │  ├─ yf_quote ──────────────▶│ Anakin Wire
+   │                         │  ├─ am_search_products ────▶│ Anakin Wire
+   │                         │  ├─ gh_search_repos ───────▶│ Anakin Wire
+   │                         │  └─ yc_search_companies ───▶│ Anakin Wire
+   │                         │         (all parallel)       │
+   │                         │                              │
+   │  ◀── SSE: status ───────│◀── "Dispatching gn_search…"  │
+   │  ◀── SSE: wire_resolved─│◀── card 1 (news, BULLISH)    │
+   │  ◀── SSE: wire_resolved─│◀── card 2 (social, …)       │
+   │  ◀── SSE: wire_resolved─│◀── … cards 3–8              │
+   │                         │                              │
+   │                         │  extractors.ts               │
+   │                         │  → keyword score per source  │
+   │                         │  → evidence URLs extracted   │
+   │                         │                              │
+   │                         │  discrepancy.ts              │
+   │                         │  → signal counts             │
+   │                         │  → Δ-Sigma computed          │
+   │                         │  → verdict label assigned    │
+   │                         │                              │
+   │                         │  gemini.ts (if key set)      │
+   │                         │  → forensic prose generated  │
+   │                         │                              │
+   │  ◀── SSE: final_verdict─│                              │
+   │      Δ-Sigma: +1.2      │                              │
+   │      HYPE DOMINATES     │                              │
+   │                         │                              │
+```
 
-    subgraph Reality["🌍 Reality Hemisphere"]
-        R1["Yahoo Finance Quote"]
-        R2["Amazon Products"]
-        R3["GitHub Repos"]
-        R4["YC Hiring Companies"]
-    end
+### Verdict pipeline (internal)
 
-    Narrative --> ENG["Discrepancy Engine"]
-    Reality --> ENG
-    ENG --> OUT["Δ-Sigma · Signal Gap · Verdict Label"]
+```
+  Raw Wire JSON
+       │
+       ▼
+  ┌─────────────────┐
+  │ collectReadable │  Only scans: title, body, description,
+  │ Text()          │  summary, headline, selftext, comment
+  └────────┬────────┘
+           │
+           ▼
+  ┌─────────────────┐
+  │ Keyword Matcher │  Hype words  → narrative score (0.0 – 1.0)
+  │ (word boundary) │  Stress words → reality score  (0.0 – −1.0)
+  └────────┬────────┘
+           │
+           ▼
+  ┌─────────────────┐
+  │ Signal Mapper   │  score > 0.15  → BULLISH
+  │                 │  score < −0.15 → BEARISH
+  │                 │  else          → NEUTRAL
+  └────────┬────────┘
+           │
+           ▼
+  ┌─────────────────┐
+  │ Hemisphere      │  Narrative: 4 sources → bullish/bearish/neutral counts
+  │ Aggregator      │  Reality:   4 sources → bullish/bearish/neutral counts
+  └────────┬────────┘
+           │
+           ├──────────────────────────────────┐
+           ▼                                  ▼
+  ┌─────────────────┐              ┌─────────────────┐
+  │ Decision Tree   │              │ Δ-Sigma Calc    │
+  │                 │              │                 │
+  │ nHigh + rWeak   │              │ avgN × 0.6      │
+  │  → HYPE DOMINATES              │  −               │
+  │ nLow + rStrong  │              │ avgR × 1.4      │
+  │  → REALITY EXCEEDS             │                 │
+  │ else            │              │ → gauge value   │
+  │  → ALIGNED      │              └─────────────────┘
+  └────────┬────────┘
+           │
+           ▼
+  ┌─────────────────┐
+  │ final_verdict   │  → streamed to UI via SSE
+  └─────────────────┘
+```
+
+### UI layout (12-column grid)
+
+```
+┌────────────────────────────────────────────────────────────────────────────┐
+│  ◈ AXIOM          [ Query input........................ ] [ EXECUTE LIVE ]  │
+│  8 sources · 6 resolved · 4 live · 0 failed                              │
+│  ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐ ┌──────────┐         │
+│  │ Byju's   │ │ Cursor   │ │ Humane   │ │ Tesla    │ │ WeWork   │  ...    │
+│  │ 📦 CACHED│ │ 📦 CACHED│ │ 📦 CACHED│ │ 📦 CACHED│ │ 📦 CACHED│         │
+│  │ ⚡ LIVE  │ │ ⚡ LIVE  │ │ ⚡ LIVE  │ │ ⚡ LIVE  │ │ ⚡ LIVE  │         │
+│  └──────────┘ └──────────┘ └──────────┘ └──────────┘ └──────────┘         │
+├──────────────────────────┬─────────────────────┬───────────────────────────┤
+│  NARRATIVE MATRIX        │  FORENSIC SYNTHESIS │  REALITY ATOMIZER         │
+│  (cols 1–5)              │  (cols 6–7)         │  (cols 8–12)              │
+│                          │                     │                           │
+│  [NEWS]      ↑ BULLISH   │   HYPE DOMINATES    │  [FINANCE]  ↓ BEARISH    │
+│  ⚡ LIVE                  │   RISK: EXTREME     │  ⚡ LIVE                   │
+│  480 articles            │                     │  $22B → $0                │
+│  View source → …         │   Δ-Sigma Gauge     │  View source → …          │
+│                          │   ●─────────○       │                           │
+│  [SOCIAL]    ↑ BULLISH   │   −2    0    +2    │  [GITHUB]   ↓ BEARISH    │
+│  …                       │                     │  …                        │
+│                          │  [COPY VERDICT]     │                           │
+├──────────────────────────┴─────────────────────┴───────────────────────────┤
+│  ● LIVE  │  TARGET: Byju's  │  [NEWS] Dispatching gn_search…              │
+└────────────────────────────────────────────────────────────────────────────┘
 ```
 
 ### Request lifecycle
