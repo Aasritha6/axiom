@@ -10,7 +10,7 @@
       { "slot": "finance", "action_id": "yf_quote", "catalog": "yahoo_finance", "fallback": "yahoo_finance" },
       { "slot": "amazon", "action_id": "am_search_products", "catalog": "amazon" },
       { "slot": "github", "action_id": "gh_search_repos", "catalog": "github" },
-      { "slot": "steam", "action_id": "st_search", "catalog": "steam", "note": "Replaced YC hiring — query-relevant market signal" }
+      { "slot": "hiring", "action_id": "yc_search_companies", "catalog": "ycombinator", "note": "is_hiring=true" }
     ]
   }
 }

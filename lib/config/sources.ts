@@ -147,14 +147,19 @@ export const WIRE_SOURCES: WireSource[] = [
     }),
   },
   {
-    id: "steam",
-    slug: "steam",
-    label: "STEAM MARKET",
+    id: "hiring",
+    slug: "hiring",
+    label: "YC HIRING COMPANIES",
     category: "REALITY",
-    actionId: "st_search",
-    catalog: "steam",
+    actionId: "yc_search_companies",
+    catalog: "ycombinator",
     credits: 2,
-    buildParams: (q) => ({ query: q, limit: 10 }),
+    buildParams: (q) => ({
+      query: q,
+      is_hiring: true,
+      hits_per_page: 20,
+      page: 0,
+    }),
   },
 ];
 

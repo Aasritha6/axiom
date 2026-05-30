@@ -1,5 +1,7 @@
 "use client";
 
+import { useCallback, useState } from "react";
+import { DeltaSigmaGauge } from "@/components/DeltaSigmaGauge";
 import type { AxiomVerdict, WeightedDelta } from "@/lib/discrepancy";
 
 interface Props {
@@ -58,6 +60,32 @@ function riskColor(risk: string): string {
 }
 
 export function VerdictMatrix({ verdict, isStreaming, activeQuery }: Props) {
+  const [copied, setCopied] = useState(false);
+
+  const copyVerdict = useCallback(async () => {
+    if (!verdict) return;
+    const text = [
+      `AXIOM VERDICT — ${activeQuery ?? "query"}`,
+      `${verdict.verdictLabel} (${verdict.riskLevel})`,
+      `Signal gap: ${verdict.signalGap}`,
+      verdict.weightedDelta
+        ? `Δ-Sigma: ${verdict.weightedDelta.delta > 0 ? "+" : ""}${verdict.weightedDelta.delta}`
+        : "",
+      "",
+      verdict.aiExplanation ?? verdict.explanation,
+    ]
+      .filter(Boolean)
+      .join("\n");
+
+    try {
+      await navigator.clipboard.writeText(text);
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    } catch {
+      /* clipboard blocked */
+    }
+  }, [verdict, activeQuery]);
+
   return (
     <section className="flex min-h-[300px] flex-col border-x border-[#333] bg-[#050505] lg:min-h-0">
       <header className="border-b border-[#333] px-3 py-2 text-center">
@@ -83,11 +111,20 @@ export function VerdictMatrix({ verdict, isStreaming, activeQuery }: Props) {
 
         {verdict && (
           <div className="w-full">
-            {verdict.isCached && (
-              <span className="mb-2 inline-block text-[8px] text-[#ffb000]">
-                📦 CURATED DEMO DATA
-              </span>
-            )}
+            <div className="mb-2 flex items-center justify-between">
+              {verdict.isCached ? (
+                <span className="text-[8px] text-[#ffb000]">📦 CURATED DEMO</span>
+              ) : (
+                <span className="text-[8px] text-[#00ff41]">⚡ LIVE SCAN</span>
+              )}
+              <button
+                type="button"
+                onClick={copyVerdict}
+                className="border border-[#333] px-2 py-0.5 text-[8px] tracking-wider text-[#888] hover:border-[#00ff41] hover:text-[#00ff41]"
+              >
+                {copied ? "COPIED ✓" : "COPY VERDICT"}
+              </button>
+            </div>
 
             <p
               className="mb-1 text-sm font-bold tracking-wide"
@@ -98,6 +135,10 @@ export function VerdictMatrix({ verdict, isStreaming, activeQuery }: Props) {
             <p className="mb-3 text-[9px] text-[#666]">
               RISK: {verdict.riskLevel} · CONF: {verdict.confidence}%
             </p>
+
+            {verdict.weightedDelta && (
+              <DeltaSigmaGauge delta={verdict.weightedDelta.delta} />
+            )}
 
             <SignalBar
               label="NARRATIVE MOMENTUM"
@@ -121,27 +162,6 @@ export function VerdictMatrix({ verdict, isStreaming, activeQuery }: Props) {
               </p>
             </div>
 
-            {verdict.weightedDelta && (
-              <div className="mb-3 border border-[#222] p-2">
-                <p className="text-[9px] text-[#555]">Δ-SIGMA (weighted)</p>
-                <p
-                  className="text-base font-bold"
-                  style={{
-                    color:
-                      verdict.weightedDelta.delta > 0.5
-                        ? "#ff3333"
-                        : verdict.weightedDelta.delta < -0.5
-                          ? "#00ff41"
-                          : "#ffb000",
-                  }}
-                >
-                  {verdict.weightedDelta.delta > 0 ? "+" : ""}
-                  {verdict.weightedDelta.delta}
-                </p>
-              </div>
-            )}
-
-            {/* Raw volume dashboard */}
             <div className="border-t border-[#222] pt-2 text-left">
               <p className="mb-1 text-[9px] text-[#555]">RAW VOLUME</p>
               <div className="flex justify-between text-[9px]">

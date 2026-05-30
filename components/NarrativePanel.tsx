@@ -1,7 +1,15 @@
 "use client";
 
 import { SourceCard } from "@/components/SourceCard";
+import { WireSkeletonCard } from "@/components/WireSkeletonCard";
 import type { WireCard } from "@/app/page";
+
+const SKELETON_LABELS = [
+  "Routing news wire…",
+  "Scanning social…",
+  "Indexing related…",
+  "Pulling youtube…",
+];
 
 interface Props {
   cards: WireCard[];
@@ -26,11 +34,10 @@ export function NarrativePanel({ cards, isStreaming }: Props) {
             Awaiting query — narrative wires idle
           </p>
         )}
-        {isStreaming && cards.length === 0 && (
-          <p className="pulse-live text-[10px] text-[#00ff41]">
-            ░ Routing news · social · youtube wires…
-          </p>
-        )}
+        {isStreaming && cards.length === 0 &&
+          SKELETON_LABELS.map((label) => (
+            <WireSkeletonCard key={label} label={label} accent="green" />
+          ))}
         {cards.map((card, i) => (
           <SourceCard key={`${card.wireId}-${i}`} card={card} index={i} />
         ))}

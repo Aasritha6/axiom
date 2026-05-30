@@ -163,7 +163,7 @@ export default function Home() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Try: Humane AI Pin, Tesla FSD, WeWork…"
+              placeholder="Try: Cursor, Humane AI Pin, Tesla FSD…"
               className="flex-1 border border-[#333] bg-black px-3 py-1.5 text-sm text-[#00ff41] placeholder-[#444] outline-none focus:border-[#00ff41]"
             />
             <button
@@ -184,11 +184,8 @@ export default function Home() {
       </header>
 
       <div className="relative grid flex-1 grid-cols-1 gap-0 lg:grid-cols-12">
-        <div className="lg:col-span-5">
-          <NarrativePanel cards={narrativeCards} isStreaming={isStreaming} />
-        </div>
-
-        <div className="lg:col-span-2">
+        {/* Mobile: verdict first · Desktop: center column */}
+        <div className="order-1 lg:order-2 lg:col-span-2">
           <VerdictMatrix
             verdict={verdict}
             isStreaming={isStreaming}
@@ -196,7 +193,11 @@ export default function Home() {
           />
         </div>
 
-        <div className="lg:col-span-5">
+        <div className="order-2 lg:order-1 lg:col-span-5">
+          <NarrativePanel cards={narrativeCards} isStreaming={isStreaming} />
+        </div>
+
+        <div className="order-3 lg:col-span-5">
           <RealityPanel cards={realityCards} isStreaming={isStreaming} />
         </div>
       </div>

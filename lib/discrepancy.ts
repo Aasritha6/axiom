@@ -152,22 +152,17 @@ export interface WeightedDelta {
 export function calculateWeightedDelta(
   results: SourceResult[]
 ): WeightedDelta {
-  const N_WEIGHT = 0.6;
-  const R_WEIGHT = 1.4;
-
   const narrative = results.filter((r) => r.category === "NARRATIVE");
   const reality = results.filter((r) => r.category === "REALITY");
 
-  const meanNarrative =
-    narrative.reduce((a, c) => a + c.sentiment * N_WEIGHT, 0) /
-    (narrative.length || 1);
-  const meanReality =
-    reality.reduce((a, c) => a + c.sentiment * R_WEIGHT, 0) /
-    (reality.length || 1);
+  const avgN =
+    narrative.reduce((a, c) => a + c.sentiment, 0) / (narrative.length || 1);
+  const avgR =
+    reality.reduce((a, c) => a + c.sentiment, 0) / (reality.length || 1);
 
-  return {
-    delta: parseFloat((meanNarrative - meanReality).toFixed(2)),
-    meanNarrative: parseFloat(meanNarrative.toFixed(2)),
-    meanReality: parseFloat(meanReality.toFixed(2)),
-  };
+  const meanNarrative = parseFloat((avgN * 0.6).toFixed(2));
+  const meanReality = parseFloat((avgR * 1.4).toFixed(2));
+  const delta = parseFloat((meanNarrative - meanReality).toFixed(2));
+
+  return { delta, meanNarrative, meanReality };
 }

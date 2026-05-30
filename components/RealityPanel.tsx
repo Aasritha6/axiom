@@ -1,7 +1,15 @@
 "use client";
 
 import { SourceCard } from "@/components/SourceCard";
+import { WireSkeletonCard } from "@/components/WireSkeletonCard";
 import type { WireCard } from "@/app/page";
+
+const SKELETON_LABELS = [
+  "Atomizing finance…",
+  "Scanning amazon…",
+  "Indexing github…",
+  "Pulling hiring data…",
+];
 
 interface Props {
   cards: WireCard[];
@@ -26,11 +34,10 @@ export function RealityPanel({ cards, isStreaming }: Props) {
             Awaiting query — reality wires idle
           </p>
         )}
-        {isStreaming && cards.length === 0 && (
-          <p className="pulse-live text-[10px] text-[#ffb000]">
-            ░ Atomizing finance · reviews · jobs data…
-          </p>
-        )}
+        {isStreaming && cards.length === 0 &&
+          SKELETON_LABELS.map((label) => (
+            <WireSkeletonCard key={label} label={label} accent="amber" />
+          ))}
         {cards.map((card, i) => (
           <SourceCard key={`${card.wireId}-${i}`} card={card} index={i} accent="amber" />
         ))}

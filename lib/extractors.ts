@@ -245,6 +245,37 @@ export function extractAmazonMetrics(data: unknown): ExtractionResult {
   };
 }
 
+export function extractHiringMetrics(data: unknown): ExtractionResult {
+  const text = collectReadableText(data);
+  const sentiment = realitySentiment(text);
+  const companyCount = extractArrayLength(data, [
+    "companies",
+    "hits",
+    "results",
+    "items",
+  ]);
+  const hiringActive =
+    companyCount > 0 &&
+    (text.includes("hiring") || text.includes("is_hiring"));
+  return {
+    signal:
+      hiringActive && companyCount >= 5
+        ? "BULLISH"
+        : companyCount === 0
+          ? "BEARISH"
+          : signalFromSentiment(sentiment),
+    sentiment: companyCount === 0 ? -0.5 : sentiment,
+    metrics: {
+      volume: companyCount,
+      rows: [
+        { label: "Hiring companies", value: companyCount },
+        { label: "YC pipeline", value: hiringActive ? "active" : "quiet" },
+      ],
+    },
+    summary: `${companyCount} YC companies hiring for query`,
+  };
+}
+
 export function extractSteamMetrics(data: unknown): ExtractionResult {
   const text = collectReadableText(data);
   const sentiment = realitySentiment(text);
@@ -276,6 +307,7 @@ const EXTRACTORS: Record<string, (data: unknown) => ExtractionResult> = {
   finance: extractFinanceMetrics,
   amazon: extractAmazonMetrics,
   github: extractGithubMetrics,
+  hiring: extractHiringMetrics,
   steam: extractSteamMetrics,
   source: extractNewsMetrics,
   local: extractNewsMetrics,

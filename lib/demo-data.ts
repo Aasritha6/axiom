@@ -11,6 +11,12 @@ export interface DemoQuery {
 
 export const FEATURED_QUERIES: DemoQuery[] = [
   {
+    id: "cursor",
+    label: "Cursor",
+    query: "Cursor AI IDE",
+    tagline: "Reality exceeds narrative — undervalued gem",
+  },
+  {
     id: "humane",
     label: "Humane AI Pin",
     query: "Humane AI Pin",
@@ -59,6 +65,38 @@ function src(
 }
 
 const DEMO_MATRICES: Record<string, SourceResult[]> = {
+  cursor: [
+    src("news", "NARRATIVE", "NEUTRAL", 0.05, 18, [
+      { label: "Articles (7d)", value: 18 },
+      { label: "Hype keywords", value: 2 },
+    ], "18 articles — quiet dev-tool coverage"),
+    src("related", "NARRATIVE", "NEUTRAL", 0.0, 6, [
+      { label: "Related stories", value: 6 },
+    ], "6 related pieces — niche not mainstream"),
+    src("social", "NARRATIVE", "NEUTRAL", 0.08, 42, [
+      { label: "Reddit threads", value: 42 },
+      { label: "Tone", value: "PRAGMATIC" },
+    ], "42 threads — developer word-of-mouth only"),
+    src("youtube", "NARRATIVE", "NEUTRAL", 0.1, 11, [
+      { label: "Videos indexed", value: 11 },
+      { label: "Promo density", value: 1 },
+    ], "11 tutorials — low hype, high utility"),
+    src("finance", "REALITY", "BULLISH", 0.45, 1, [
+      { label: "Private valuation", value: "$2.6B" },
+      { label: "Growth", value: "ACCELERATING" },
+    ], "Strong private-market traction"),
+    src("amazon", "REALITY", "NEUTRAL", 0.05, 8, [
+      { label: "Peripheral listings", value: 8 },
+    ], "Minimal consumer SKU noise"),
+    src("github", "REALITY", "BULLISH", 0.72, 340, [
+      { label: "Related repos", value: 340 },
+      { label: "Top stars", value: "48k+" },
+    ], "340 repos — massive OSS ecosystem activity"),
+    src("hiring", "REALITY", "BULLISH", 0.65, 89, [
+      { label: "YC hiring cos", value: 89 },
+      { label: "AI tooling roles", value: "SURGING" },
+    ], "89 YC companies hiring in AI dev tools"),
+  ],
   humane: [
     src("news", "NARRATIVE", "BULLISH", 0.85, 142, [
       { label: "Articles (7d)", value: 142 },
@@ -88,10 +126,10 @@ const DEMO_MATRICES: Record<string, SourceResult[]> = {
       { label: "Active repos", value: 3 },
       { label: "Commit velocity", value: "FLATLINE" },
     ], "3 repos — commits flatlined post-launch"),
-    src("steam", "REALITY", "BEARISH", -0.95, 0, [
-      { label: "Steam presence", value: 0 },
-      { label: "Player traction", value: "NONE" },
-    ], "No Steam market traction — product dead on arrival"),
+    src("hiring", "REALITY", "BEARISH", -0.95, 0, [
+      { label: "YC hiring cos", value: 0 },
+      { label: "Hiring freeze", value: "CONFIRMED" },
+    ], "0 YC companies hiring — team frozen"),
   ],
   "tesla-fsd": [
     src("news", "NARRATIVE", "BULLISH", 0.55, 98, [
@@ -121,10 +159,10 @@ const DEMO_MATRICES: Record<string, SourceResult[]> = {
       { label: "Open repos", value: 28 },
       { label: "Stars (top)", value: "12.4k" },
     ], "28 public repos — active autopilot tooling"),
-    src("steam", "REALITY", "NEUTRAL", 0.1, 12, [
-      { label: "Steam apps", value: 12 },
-      { label: "FSD-related", value: "INDIRECT" },
-    ], "12 Steam listings — mostly third-party tools"),
+    src("hiring", "REALITY", "BULLISH", 0.4, 47, [
+      { label: "YC hiring cos", value: 47 },
+      { label: "ML roles", value: "EXPANDING" },
+    ], "47 companies hiring in autonomy space"),
   ],
   wework: [
     src("news", "NARRATIVE", "BULLISH", 0.95, 320, [
@@ -154,10 +192,10 @@ const DEMO_MATRICES: Record<string, SourceResult[]> = {
       { label: "Public repos", value: 5 },
       { label: "Last commit", value: "2y ago" },
     ], "Stale open-source footprint"),
-    src("steam", "REALITY", "BEARISH", -0.85, 2, [
-      { label: "Steam apps", value: 2 },
-      { label: "Market relevance", value: "MINIMAL" },
-    ], "Negligible Steam footprint post-collapse"),
+    src("hiring", "REALITY", "BEARISH", -0.85, 3, [
+      { label: "YC hiring cos", value: 3 },
+      { label: "Mass layoffs", value: "6,000+" },
+    ], "3 listings post-layoffs of 6,000+"),
   ],
 };
 
