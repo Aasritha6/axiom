@@ -1,3 +1,4 @@
+import { guessTicker } from "@/lib/config/sources";
 interface WireTaskResponse {
   job_id?: string;
   id?: string;
