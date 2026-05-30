@@ -1,68 +1,73 @@
 @import "tailwindcss";
 
-/* ═══════════════════════════════════════════════════════════
-   AXIOM globals.css — minimal surgical fix
-   
-   ONLY changes: gray text → readable green-tinted text
-   NOTHING ELSE TOUCHED: no layout, no sizing, no display
-   ═══════════════════════════════════════════════════════════ */
+/* ─────────────────────────────────────────────
+   AXIOM — globals.css
+   ONE job: make gray text readable on dark bg.
+   Nothing else changes. Layout stays identical.
+   ───────────────────────────────────────────── */
 
+/* scrollbar */
 ::-webkit-scrollbar       { width: 5px; }
 ::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: #1a4a1a; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #00cc33; }
 ::selection { background: #00cc33; color: #000; }
 
-/* ── The only fix: gray text → readable on dark background ── */
+/*
+  THE FIX:
+  Tailwind gray/slate/zinc classes render as mid-gray (#6b7280, #71717a etc.)
+  On your dark green-black cards that is unreadable.
+  Map every one to a bright green-tinted equivalent that IS readable.
+*/
 
+.text-gray-200 { color: #e2ffe2 !important; }
 .text-gray-300 { color: #c8f0c8 !important; }
 .text-gray-400 { color: #a8d8a8 !important; }
-.text-gray-500 { color: #88c088 !important; }
-.text-gray-600 { color: #6aaa6a !important; }
+.text-gray-500 { color: #88c888 !important; }
+.text-gray-600 { color: #6ab86a !important; }
 
+.text-slate-200 { color: #e2ffe2 !important; }
 .text-slate-300 { color: #c8f0c8 !important; }
 .text-slate-400 { color: #a8d8a8 !important; }
-.text-slate-500 { color: #88c088 !important; }
+.text-slate-500 { color: #88c888 !important; }
 
-.text-zinc-300 { color: #c8f0c8 !important; }
-.text-zinc-400 { color: #a8d8a8 !important; }
-.text-zinc-500 { color: #88c088 !important; }
+.text-zinc-200  { color: #e2ffe2 !important; }
+.text-zinc-300  { color: #c8f0c8 !important; }
+.text-zinc-400  { color: #a8d8a8 !important; }
+.text-zinc-500  { color: #88c888 !important; }
 
-/* white with opacity — show as visible mint instead of faded */
+/* white-with-opacity variants — stop them fading to invisible */
 .text-white\/80 { color: #e2ffe2 !important; opacity: 1 !important; }
 .text-white\/70 { color: #d4f0d4 !important; opacity: 1 !important; }
 .text-white\/60 { color: #c8f0c8 !important; opacity: 1 !important; }
 .text-white\/50 { color: #b0deb0 !important; opacity: 1 !important; }
 .text-white\/40 { color: #99cc99 !important; opacity: 1 !important; }
 
-/* ── Animations — purely additive, touch nothing existing ── */
+/* ── subtle animations (additive only, break nothing) ── */
 
 @keyframes card-in {
-  from { opacity: 0; transform: translateY(8px); }
+  from { opacity: 0; transform: translateY(6px); }
   to   { opacity: 1; transform: translateY(0); }
 }
-
 @keyframes live-blink {
   0%, 100% { opacity: 1; }
-  50%       { opacity: 0.1; }
+  50%       { opacity: 0.15; }
 }
-
-@keyframes glow-throb {
-  0%, 100% { box-shadow: 0 0 5px rgba(0,255,65,0.10); }
-  50%       { box-shadow: 0 0 20px rgba(0,255,65,0.28); }
+@keyframes verdict-glow {
+  0%, 100% { box-shadow: 0 0 4px rgba(0,255,65,0.08); }
+  50%       { box-shadow: 0 0 18px rgba(0,255,65,0.25); }
 }
-
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-/* opt-in classes — add these to elements in TSX to get animations */
-.animate-card-in       { animation: card-in 300ms ease both; }
-.animate-live          { animation: live-blink 1.1s ease-in-out infinite; }
-.animate-verdict-glow  { animation: glow-throb 3s ease-in-out infinite; }
+/* opt-in — add these classnames to TSX elements to enable */
+.animate-card-in      { animation: card-in 280ms ease both; }
+.animate-live         { animation: live-blink 1.1s ease-in-out infinite; }
+.animate-verdict-glow { animation: verdict-glow 3s ease-in-out infinite; }
 
-/* skeleton shimmer */
+/* make Tailwind's skeleton pulse look better */
 .animate-pulse {
   background: linear-gradient(90deg,
     #111811 25%, #1c301c 50%, #111811 75%) !important;
