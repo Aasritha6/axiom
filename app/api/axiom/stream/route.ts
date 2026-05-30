@@ -12,6 +12,8 @@ import { synthesizeWithGemini } from "@/lib/gemini";
 import { getWireCache, setWireCache } from "@/lib/wire-cache";
 
 export const dynamic = "force-dynamic";
+export const runtime = "nodejs";
+export const maxDuration = 60;
 
 function sseEncode(encoder: TextEncoder, event: string, data: object) {
   return encoder.encode(`event: ${event}\ndata: ${JSON.stringify(data)}\n\n`);

@@ -217,7 +217,7 @@ export default function Home() {
               type="text"
               value={query}
               onChange={(e) => setQuery(e.target.value)}
-              placeholder="Try: Cursor, Humane AI Pin, Tesla FSD…"
+              placeholder="Try: Byju's, Cursor, Humane AI Pin…"
               className="flex-1 border border-[#333] bg-black px-3 py-1.5 text-sm text-[#00ff41] placeholder-[#444] outline-none focus:border-[#00ff41]"
             />
             <button

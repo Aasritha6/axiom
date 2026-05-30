@@ -17,6 +17,12 @@ export const FEATURED_QUERIES: DemoQuery[] = [
     tagline: "Reality exceeds narrative — undervalued gem",
   },
   {
+    id: "byjus",
+    label: "Byju's",
+    query: "Byju's",
+    tagline: "India's hype collapse — $22B valuation to NCLT insolvency",
+  },
+  {
     id: "humane",
     label: "Humane AI Pin",
     query: "Humane AI Pin",
@@ -96,6 +102,40 @@ const DEMO_MATRICES: Record<string, SourceResult[]> = {
       { label: "YC hiring cos", value: 89 },
       { label: "AI tooling roles", value: "SURGING" },
     ], "89 YC companies hiring in AI dev tools"),
+  ],
+  byjus: [
+    src("news", "NARRATIVE", "BULLISH", 0.92, 480, [
+      { label: "Peak articles (2019–22)", value: 480 },
+      { label: "Hype keywords", value: 112 },
+    ], "480 articles — 'India's most valuable startup' narrative"),
+    src("related", "NARRATIVE", "BULLISH", 0.88, 156, [
+      { label: "Related coverage", value: 156 },
+      { label: "Edtech revolution", value: "PEAK" },
+    ], "156 related stories — edtech revolution rhetoric"),
+    src("social", "NARRATIVE", "BULLISH", 0.85, 220, [
+      { label: "Reddit / social threads", value: 220 },
+      { label: "Viral index", value: "NATIONAL" },
+    ], "220 social signals — nationwide hype cycle"),
+    src("youtube", "NARRATIVE", "BULLISH", 0.78, 64, [
+      { label: "Promo videos", value: 64 },
+      { label: "Celebrity endorsements", value: 28 },
+    ], "64 YouTube promos — celebrity-backed hype"),
+    src("finance", "REALITY", "BEARISH", -0.98, 1, [
+      { label: "Valuation", value: "$22B → ~$0" },
+      { label: "NCLT status", value: "INSOLVENCY" },
+    ], "Valuation collapse — NCLT insolvency proceedings"),
+    src("amazon", "REALITY", "BEARISH", -0.75, 890, [
+      { label: "Course listings", value: 890 },
+      { label: "Avg rating", value: "2.4★" },
+    ], "Refund waves dominate consumer reviews"),
+    src("github", "REALITY", "BEARISH", -0.55, 8, [
+      { label: "Public repos", value: 8 },
+      { label: "Commit velocity", value: "DECLINING" },
+    ], "OSS footprint stagnant post-layoffs"),
+    src("hiring", "REALITY", "BEARISH", -0.95, 2, [
+      { label: "YC hiring cos", value: 2 },
+      { label: "Layoffs", value: "10,000+" },
+    ], "Mass layoffs — hiring frozen across edtech"),
   ],
   humane: [
     src("news", "NARRATIVE", "BULLISH", 0.85, 142, [

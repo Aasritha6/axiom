@@ -35,8 +35,8 @@ export function RealityPanel({ cards, isStreaming, onRetry }: Props) {
             Awaiting query — reality wires idle
           </p>
         )}
-        {isStreaming && cards.length === 0 &&
-          SKELETON_LABELS.map((label) => (
+        {isStreaming && cards.length < SKELETON_LABELS.length &&
+          SKELETON_LABELS.slice(cards.length).map((label) => (
             <WireSkeletonCard key={label} label={label} accent="amber" />
           ))}
         {cards.map((card, i) => (

@@ -35,8 +35,8 @@ export function NarrativePanel({ cards, isStreaming, onRetry }: Props) {
             Awaiting query — narrative wires idle
           </p>
         )}
-        {isStreaming && cards.length === 0 &&
-          SKELETON_LABELS.map((label) => (
+        {isStreaming && cards.length < SKELETON_LABELS.length &&
+          SKELETON_LABELS.slice(cards.length).map((label) => (
             <WireSkeletonCard key={label} label={label} accent="green" />
           ))}
         {cards.map((card, i) => (
