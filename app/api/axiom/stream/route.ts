@@ -9,6 +9,7 @@ import { extractForSource } from "@/lib/extractors";
 import { WIRE_SOURCES, MIN_SOURCES_PER_HEMISPHERE } from "@/lib/config/sources";
 import { findDemoIdByQuery, getDemoPayload } from "@/lib/demo-data";
 import { synthesizeWithGemini } from "@/lib/gemini";
+import { getWireCache, setWireCache } from "@/lib/wire-cache";
 
 export const dynamic = "force-dynamic";
 
@@ -20,7 +21,8 @@ export async function GET(req: NextRequest) {
   const { searchParams } = new URL(req.url);
   const query = searchParams.get("query")?.trim() ?? "";
   const forceLive = searchParams.get("live") === "1";
-  const demoId = searchParams.get("demo") ?? findDemoIdByQuery(query);
+  const demoIdParam = searchParams.get("demo");
+  const demoId = demoIdParam ?? findDemoIdByQuery(query);
 
   const encoder = new TextEncoder();
 
@@ -39,7 +41,6 @@ export async function GET(req: NextRequest) {
       try {
         send("status", { message: "⚡ AXIOM: Initializing Split-Brain Routing Matrix…" });
 
-        // Cached demo path — unless user explicitly forces live
         if (demoId && !forceLive) {
           const demo = getDemoPayload(demoId);
           if (demo) {
@@ -57,6 +58,7 @@ export async function GET(req: NextRequest) {
                 volume: source.volume,
                 summary: source.summary,
                 isLive: false,
+                evidenceLinks: [],
               });
             }
 
@@ -74,14 +76,39 @@ export async function GET(req: NextRequest) {
 
         const tasks = WIRE_SOURCES.map(async (wire) => {
           try {
-            const params = wire.buildParams(query);
-            const { data, isLive, isFallback } = await resolveSourceWithFallback(
-              wire.actionId,
-              params,
-              query,
-              wire.fallback,
-              (msg) => send("status", { message: `[${wire.slug.toUpperCase()}] ${msg}` })
-            );
+            let data: unknown;
+            let isLive = false;
+            let isFallback = false;
+            let fromWireCache = false;
+
+            if (!forceLive) {
+              const cached = getWireCache(query, wire.slug);
+              if (cached) {
+                data = cached;
+                fromWireCache = true;
+                send("status", {
+                  message: `[${wire.slug.toUpperCase()}] Wire cache hit (2h TTL)`,
+                });
+              }
+            }
+
+            if (!data) {
+              const params = wire.buildParams(query);
+              const resolved = await resolveSourceWithFallback(
+                wire.actionId,
+                params,
+                query,
+                wire.fallback,
+                (msg) =>
+                  send("status", { message: `[${wire.slug.toUpperCase()}] ${msg}` })
+              );
+              data = resolved.data;
+              isLive = resolved.isLive;
+              isFallback = resolved.isFallback;
+              if (!forceLive && !isFallback) {
+                setWireCache(query, wire.slug, data);
+              }
+            }
 
             const extracted = extractForSource(wire.slug, data);
 
@@ -93,7 +120,7 @@ export async function GET(req: NextRequest) {
               metrics: extracted.metrics.rows,
               volume: extracted.metrics.volume,
               summary: extracted.summary,
-              isLive,
+              isLive: isLive && !isFallback && !fromWireCache,
             };
 
             results.push(result);
@@ -107,15 +134,22 @@ export async function GET(req: NextRequest) {
               metrics: extracted.metrics.rows,
               volume: extracted.metrics.volume,
               summary: extracted.summary,
-              isLive: isLive && !isFallback,
+              isLive: isLive && !isFallback && !fromWireCache,
               isFallback,
+              fromWireCache,
+              evidenceLinks: extracted.evidenceLinks ?? [],
             });
           } catch (err) {
             const message = err instanceof Error ? err.message : String(err);
             send("status", {
               message: `⚠️ [${wire.slug.toUpperCase()}] Fault isolated: ${message}`,
             });
-            send("wire_failed", { wireId: wire.slug, message });
+            send("wire_failed", {
+              wireId: wire.slug,
+              label: wire.label,
+              category: wire.category,
+              message,
+            });
           }
         });
 
@@ -123,7 +157,6 @@ export async function GET(req: NextRequest) {
 
         const verdict = calculateVerdict(results, MIN_SOURCES_PER_HEMISPHERE);
         const weightedDelta = calculateWeightedDelta(results);
-
         const aiExplanation = await synthesizeWithGemini(query, results, verdict);
 
         send("final_verdict", {

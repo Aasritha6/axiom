@@ -14,9 +14,10 @@ const SKELETON_LABELS = [
 interface Props {
   cards: WireCard[];
   isStreaming: boolean;
+  onRetry?: () => void;
 }
 
-export function NarrativePanel({ cards, isStreaming }: Props) {
+export function NarrativePanel({ cards, isStreaming, onRetry }: Props) {
   return (
     <section className="flex h-full min-h-[400px] flex-col border-r border-[#333] lg:min-h-0">
       <header className="border-b border-[#333] px-3 py-2">
@@ -39,7 +40,12 @@ export function NarrativePanel({ cards, isStreaming }: Props) {
             <WireSkeletonCard key={label} label={label} accent="green" />
           ))}
         {cards.map((card, i) => (
-          <SourceCard key={`${card.wireId}-${i}`} card={card} index={i} />
+          <SourceCard
+            key={`${card.wireId}-${i}`}
+            card={card}
+            index={i}
+            onRetry={card.failed ? onRetry : undefined}
+          />
         ))}
       </div>
     </section>

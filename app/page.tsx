@@ -14,18 +14,26 @@ export interface WireCard {
   wireId: string;
   label?: string;
   category: "NARRATIVE" | "REALITY";
-  signal: "BULLISH" | "BEARISH" | "NEUTRAL";
-  sentiment: number;
+  signal?: "BULLISH" | "BEARISH" | "NEUTRAL";
+  sentiment?: number;
   metrics: { label: string; value: string | number }[];
-  volume: number;
+  volume?: number;
   summary: string;
   isLive: boolean;
   isFallback?: boolean;
+  fromWireCache?: boolean;
+  failed?: boolean;
+  errorMessage?: string;
+  evidenceLinks?: string[];
 }
 
 export default function Home() {
   const [query, setQuery] = useState("");
   const [activeQuery, setActiveQuery] = useState<string | null>(null);
+  const [lastRunOpts, setLastRunOpts] = useState<{
+    demo?: string;
+    forceLive?: boolean;
+  }>({});
   const [statusLog, setStatusLog] = useState<string[]>([]);
   const [narrativeCards, setNarrativeCards] = useState<WireCard[]>([]);
   const [realityCards, setRealityCards] = useState<WireCard[]>([]);
@@ -47,11 +55,17 @@ export default function Home() {
 
   const sourceStats = useMemo(() => {
     const total = WIRE_SOURCES.length;
-    const resolved = allCards.length;
-    const live = allCards.filter((c) => c.isLive && !c.isFallback).length;
+    const resolved = allCards.filter((c) => !c.failed).length;
+    const failed = allCards.filter((c) => c.failed).length;
+    const live = allCards.filter(
+      (c) => c.isLive && !c.isFallback && !c.fromWireCache
+    ).length;
     const fallback = allCards.filter((c) => c.isFallback).length;
-    const cached = allCards.filter((c) => !c.isLive && !c.isFallback).length;
-    return { total, resolved, live, fallback, cached };
+    const wireCache = allCards.filter((c) => c.fromWireCache).length;
+    const demoCached = allCards.filter(
+      (c) => !c.isLive && !c.isFallback && !c.fromWireCache && !c.failed
+    ).length;
+    return { total, resolved, failed, live, fallback, wireCache, demoCached };
   }, [allCards]);
 
   const resetStream = useCallback(() => {
@@ -68,6 +82,7 @@ export default function Home() {
     (q: string, opts?: { demo?: string; forceLive?: boolean }) => {
       resetStream();
       setActiveQuery(q);
+      setLastRunOpts(opts ?? {});
       setIsStreaming(true);
 
       const params = new URLSearchParams({ query: q });
@@ -77,18 +92,40 @@ export default function Home() {
       const es = new EventSource(`/api/axiom/stream?${params}`);
       eventSourceRef.current = es;
 
+      const pushCard = (card: WireCard) => {
+        if (card.category === "NARRATIVE") {
+          setNarrativeCards((prev) => [...prev, card]);
+        } else {
+          setRealityCards((prev) => [...prev, card]);
+        }
+      };
+
       es.addEventListener("status", (e) => {
         const data = JSON.parse(e.data) as { message: string };
         setStatusLog((prev) => [...prev.slice(-20), data.message]);
       });
 
       es.addEventListener("wire_resolved", (e) => {
-        const card = JSON.parse(e.data) as WireCard;
-        if (card.category === "NARRATIVE") {
-          setNarrativeCards((prev) => [...prev, card]);
-        } else {
-          setRealityCards((prev) => [...prev, card]);
-        }
+        pushCard(JSON.parse(e.data) as WireCard);
+      });
+
+      es.addEventListener("wire_failed", (e) => {
+        const data = JSON.parse(e.data) as {
+          wireId: string;
+          label?: string;
+          category: "NARRATIVE" | "REALITY";
+          message: string;
+        };
+        pushCard({
+          wireId: data.wireId,
+          label: data.label,
+          category: data.category,
+          failed: true,
+          errorMessage: data.message,
+          summary: "Wire execution failed",
+          metrics: [],
+          isLive: false,
+        });
       });
 
       es.addEventListener("final_verdict", (e) => {
@@ -121,16 +158,26 @@ export default function Home() {
     [resetStream]
   );
 
+  const handleRetry = useCallback(() => {
+    if (!activeQuery) return;
+    runAnalysis(activeQuery, { ...lastRunOpts, forceLive: true });
+  }, [activeQuery, lastRunOpts, runAnalysis]);
+
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const trimmed = query.trim();
     if (!trimmed) return;
-    runAnalysis(trimmed);
+    runAnalysis(trimmed, { forceLive: true });
   };
 
-  const handleFeatured = (demoId: string, label: string) => {
+  const handleFeaturedCached = (demoId: string, label: string) => {
     setQuery(label);
     runAnalysis(label, { demo: demoId });
+  };
+
+  const handleFeaturedLive = (demoId: string, label: string) => {
+    setQuery(label);
+    runAnalysis(label, { demo: demoId, forceLive: true });
   };
 
   return (
@@ -142,17 +189,24 @@ export default function Home() {
               ◈ AXIOM
             </h1>
             <p className="text-[10px] tracking-wider text-[#666]">
-              NARRATIVE vs. GROUND TRUTH · FORENSIC TERMINAL v0.2
+              NARRATIVE vs. GROUND TRUTH · FORENSIC TERMINAL v0.3
             </p>
             {(isStreaming || allCards.length > 0) && (
               <p className="mt-1 text-[9px] text-[#ffb000]">
-                {sourceStats.total} sources · {sourceStats.resolved} resolved ·{" "}
+                {sourceStats.total} sources · {sourceStats.resolved} resolved
+                {sourceStats.failed > 0 && (
+                  <> · <span className="text-[#ff3333]">{sourceStats.failed} failed</span></>
+                )}
+                {" · "}
                 <span className="text-[#00ff41]">{sourceStats.live} live</span>
                 {sourceStats.fallback > 0 && (
                   <> · {sourceStats.fallback} fallback</>
                 )}
-                {sourceStats.cached > 0 && (
-                  <> · {sourceStats.cached} cached</>
+                {sourceStats.wireCache > 0 && (
+                  <> · {sourceStats.wireCache} wire cache</>
+                )}
+                {sourceStats.demoCached > 0 && (
+                  <> · {sourceStats.demoCached} demo</>
                 )}
               </p>
             )}
@@ -171,20 +225,20 @@ export default function Home() {
               disabled={isStreaming}
               className="border border-[#00ff41] px-4 py-1.5 text-xs tracking-wider hover:bg-[#00ff41] hover:text-black disabled:opacity-40"
             >
-              {isStreaming ? "SCANNING…" : "EXECUTE"}
+              {isStreaming ? "SCANNING…" : "EXECUTE LIVE"}
             </button>
           </form>
         </div>
 
         <FeaturedCarousel
           queries={FEATURED_QUERIES}
-          onSelect={handleFeatured}
+          onSelectCached={handleFeaturedCached}
+          onSelectLive={handleFeaturedLive}
           disabled={isStreaming}
         />
       </header>
 
       <div className="relative grid flex-1 grid-cols-1 gap-0 lg:grid-cols-12">
-        {/* Mobile: verdict first · Desktop: center column */}
         <div className="order-1 lg:order-2 lg:col-span-2">
           <VerdictMatrix
             verdict={verdict}
@@ -194,11 +248,19 @@ export default function Home() {
         </div>
 
         <div className="order-2 lg:order-1 lg:col-span-5">
-          <NarrativePanel cards={narrativeCards} isStreaming={isStreaming} />
+          <NarrativePanel
+            cards={narrativeCards}
+            isStreaming={isStreaming}
+            onRetry={handleRetry}
+          />
         </div>
 
         <div className="order-3 lg:col-span-5">
-          <RealityPanel cards={realityCards} isStreaming={isStreaming} />
+          <RealityPanel
+            cards={realityCards}
+            isStreaming={isStreaming}
+            onRetry={handleRetry}
+          />
         </div>
       </div>
 

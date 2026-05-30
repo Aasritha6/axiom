@@ -10,6 +10,7 @@ export interface ExtractionResult {
   sentiment: number;
   metrics: RawMetrics;
   summary: string;
+  evidenceLinks?: string[];
 }
 
 const HYPE_WORDS = [
@@ -73,6 +74,57 @@ export function collectReadableText(data: unknown, depth = 0): string {
     return parts.join(" ");
   }
   return "";
+}
+
+const URL_FIELD_KEYS = new Set([
+  "url",
+  "link",
+  "href",
+  "permalink",
+  "html_url",
+  "web_url",
+  "article_url",
+]);
+
+/** Pull up to 3 evidence URLs from Wire payload */
+export function collectEvidenceLinks(
+  data: unknown,
+  max = 3,
+  depth = 0,
+  found: string[] = []
+): string[] {
+  if (depth > 10 || found.length >= max) return found.slice(0, max);
+
+  if (typeof data === "string") {
+    if (/^https?:\/\//i.test(data) && !found.includes(data)) found.push(data);
+    return found.slice(0, max);
+  }
+
+  if (Array.isArray(data)) {
+    for (const item of data) {
+      collectEvidenceLinks(item, max, depth + 1, found);
+      if (found.length >= max) break;
+    }
+    return found.slice(0, max);
+  }
+
+  if (data && typeof data === "object") {
+    for (const [key, val] of Object.entries(data as Record<string, unknown>)) {
+      if (
+        URL_FIELD_KEYS.has(key.toLowerCase()) &&
+        typeof val === "string" &&
+        /^https?:\/\//i.test(val) &&
+        !found.includes(val)
+      ) {
+        found.push(val);
+      } else if (val && typeof val === "object") {
+        collectEvidenceLinks(val, max, depth + 1, found);
+      }
+      if (found.length >= max) break;
+    }
+  }
+
+  return found.slice(0, max);
 }
 
 function countKeywordMatches(text: string, words: string[]): number {
@@ -315,17 +367,19 @@ const EXTRACTORS: Record<string, (data: unknown) => ExtractionResult> = {
 
 export function extractForSource(slug: string, data: unknown): ExtractionResult {
   const fn = EXTRACTORS[slug];
-  if (!fn) {
-    const text = collectReadableText(data);
-    const sentiment = narrativeSentiment(text);
-    return {
-      signal: signalFromSentiment(sentiment),
-      sentiment,
-      metrics: { volume: 0, rows: [{ label: "Payload", value: "received" }] },
-      summary: "Generic extraction",
-    };
-  }
-  return fn(data);
+  const base = fn
+    ? fn(data)
+    : {
+        signal: signalFromSentiment(narrativeSentiment(collectReadableText(data))),
+        sentiment: narrativeSentiment(collectReadableText(data)),
+        metrics: { volume: 0, rows: [{ label: "Payload", value: "received" }] },
+        summary: "Generic extraction",
+      };
+
+  return {
+    ...base,
+    evidenceLinks: collectEvidenceLinks(data),
+  };
 }
 
 export type VolumeLevel = "high" | "medium" | "low";

@@ -28,3 +28,6 @@ next-env.d.ts
 
 # Vercel
 .vercel
+
+# Wire result cache (2h TTL)
+.cache/
