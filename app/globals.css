@@ -1,54 +1,132 @@
+/* ============================================================
+   AXIOM — globals.css
+   Replace app/globals.css with this file entirely.
+   Changes:
+   - True black background (#080b08)
+   - ALL text bright white/green — no gray-on-dark ever
+   - Font sizes bumped up ~20% across the board
+   - Smooth scan-line animation (CSS only, subtle)
+   - Phosphor green glow on interactive elements
+   - Fade-in + slide-up on card arrival
+   - Pulse animation on LIVE badge
+   ============================================================ */
+
 @import "tailwindcss";
 
+/* ── Root design tokens ────────────────────────────────────── */
 :root {
-  --axiom-black: #000000;
-  --axiom-green: #00ff41;
-  --axiom-amber: #ffb000;
-  --axiom-red: #ff3333;
-  --axiom-dim: #1a1a1a;
-  --axiom-border: #333333;
-  --axiom-muted: #666666;
-  --axiom-surface: #0d0d0d;
-  --axiom-surface-2: #111111;
+  --bg-base:        #080b08;   /* near-black with a green tint */
+  --bg-panel:       #0d110d;   /* panel surface */
+  --bg-card:        #111611;   /* card surface */
+  --bg-card-hover:  #161e16;
+
+  --green-bright:   #00ff41;   /* phosphor green — primary text & accents */
+  --green-mid:      #00cc33;   /* secondary accents */
+  --green-dim:      #00aa22;   /* tertiary — still clearly visible */
+  --green-muted:    #007a18;   /* borders, dividers — visible but not loud */
+
+  --amber:          #ffb300;   /* warning / narrative signals */
+  --red-signal:     #ff3333;   /* bearish / hype signals */
+  --cyan:           #00e5ff;   /* reality / data signals */
+
+  --text-primary:   #e8ffe8;   /* body copy — near-white with green tint */
+  --text-label:     #00ff41;   /* labels, section headers */
+  --text-meta:      #99ddaa;   /* metadata — still clearly readable */
+
+  --border:         #1a2e1a;
+  --border-bright:  #00ff41;
+
+  --font-terminal:  'Courier New', Courier, 'Lucida Console', monospace;
+
+  --transition:     150ms ease;
 }
 
-* {
+/* ── Base reset ────────────────────────────────────────────── */
+*, *::before, *::after {
   box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
   margin: 0;
   padding: 0;
-  background: var(--axiom-black);
-  color: var(--axiom-green);
-  font-family: "Courier New", Courier, monospace;
-  font-size: 13px;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
 }
 
-/* Scan line overlay — subtle CRT texture */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-  background: repeating-linear-gradient(
+html {
+  font-size: 16px;       /* base — components use rem so this scales everything */
+  scroll-behavior: smooth;
+}
+
+body {
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  font-family: var(--font-terminal);
+  font-size: 1rem;       /* 16px — was typically 14px before */
+  line-height: 1.65;
+  min-height: 100vh;
+  overflow-x: hidden;
+
+  /* Subtle scanline texture — purely decorative, doesn't reduce readability */
+  background-image: repeating-linear-gradient(
     0deg,
     transparent,
-    transparent 2px,
-    rgba(0, 255, 65, 0.015) 2px,
+    transparent 3px,
+    rgba(0, 255, 65, 0.015) 3px,
     rgba(0, 255, 65, 0.015) 4px
   );
-  pointer-events: none;
-  z-index: 9999;
 }
 
+/* ── Typography scale ──────────────────────────────────────── */
+h1, h2, h3, h4, h5, h6 {
+  font-family: var(--font-terminal);
+  color: var(--green-bright);
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+}
+
+h1 { font-size: 2rem;    font-weight: 700; }   /* was ~1.5rem */
+h2 { font-size: 1.5rem;  font-weight: 700; }
+h3 { font-size: 1.2rem;  font-weight: 600; }
+h4 { font-size: 1.05rem; font-weight: 600; }
+
+p, li, span, td, th {
+  font-size: 1rem;        /* 16px — all body text */
+  color: var(--text-primary);
+}
+
+small, .text-sm {
+  font-size: 0.9rem !important;  /* 14.4px — was often 12px */
+  color: var(--text-meta) !important;
+}
+
+/* ── Links ─────────────────────────────────────────────────── */
+a {
+  color: var(--green-bright);
+  text-decoration: none;
+  transition: color var(--transition), text-shadow var(--transition);
+}
+a:hover {
+  color: #ffffff;
+  text-shadow: 0 0 8px var(--green-bright);
+}
+
+/* ── Scrollbar ─────────────────────────────────────────────── */
+::-webkit-scrollbar       { width: 6px; }
+::-webkit-scrollbar-track { background: var(--bg-base); }
+::-webkit-scrollbar-thumb { background: var(--green-muted); border-radius: 3px; }
+::-webkit-scrollbar-thumb:hover { background: var(--green-mid); }
+
+/* ── Selection ─────────────────────────────────────────────── */
+::selection {
+  background: var(--green-mid);
+  color: #000;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   KEYFRAME ANIMATIONS
+   ═══════════════════════════════════════════════════════════ */
+
+/* Card arrival — used by SourceCard */
 @keyframes card-arrive {
   from {
     opacity: 0;
-    transform: translateY(6px);
+    transform: translateY(12px);
   }
   to {
     opacity: 1;
@@ -56,198 +134,323 @@ body::before {
   }
 }
 
-@keyframes pulse-glow {
+/* Blinking cursor / LIVE badge pulse */
+@keyframes live-pulse {
   0%, 100% { opacity: 1; }
-  50% { opacity: 0.4; }
+  50%       { opacity: 0.2; }
 }
 
-@keyframes border-flicker {
-  0%, 100% { border-color: rgba(0, 255, 65, 0.3); }
-  50% { border-color: rgba(0, 255, 65, 0.6); }
+/* Glow throb on verdict panel */
+@keyframes glow-throb {
+  0%, 100% { box-shadow: 0 0 6px rgba(0, 255, 65, 0.15); }
+  50%       { box-shadow: 0 0 20px rgba(0, 255, 65, 0.35); }
 }
 
-.card-arrive {
-  animation: card-arrive 0.3s ease-out forwards;
+/* Scan line sweep — decorative, on the terminal header */
+@keyframes scan-sweep {
+  0%   { transform: translateY(-100%); }
+  100% { transform: translateY(100vh); }
 }
 
-.pulse-live {
-  animation: pulse-glow 1.4s ease-in-out infinite;
+/* Typing cursor blink */
+@keyframes cursor-blink {
+  0%, 100% { border-right-color: var(--green-bright); }
+  50%       { border-right-color: transparent; }
 }
 
-.wire-card {
-  position: relative;
-  background: var(--axiom-surface);
-  border: 1px solid rgba(0, 255, 65, 0.15);
-  padding: 10px 12px;
-  transition: border-color 0.2s ease;
+/* ═══════════════════════════════════════════════════════════
+   UTILITY CLASSES
+   These are applied via className in TSX — replace any
+   existing gray-text classes with these.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Panels */
+.axiom-panel {
+  background: var(--bg-panel);
+  border: 1px solid var(--border);
+  border-radius: 2px;
 }
 
-.wire-card:hover {
-  border-color: rgba(0, 255, 65, 0.35);
-  background: var(--axiom-surface-2);
+/* Cards */
+.axiom-card {
+  background: var(--bg-card);
+  border: 1px solid var(--border);
+  border-radius: 2px;
+  padding: 1rem 1.25rem;
+  transition: background var(--transition), border-color var(--transition);
+  animation: card-arrive 350ms ease both;
+}
+.axiom-card:hover {
+  background: var(--bg-card-hover);
+  border-color: var(--green-muted);
 }
 
-.wire-card-amber {
-  border-color: rgba(255, 176, 0, 0.15);
-}
-
-.wire-card-amber:hover {
-  border-color: rgba(255, 176, 0, 0.35);
-}
-
-.wire-card::before {
-  content: "";
-  position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
-  width: 2px;
-  background: rgba(0, 255, 65, 0.4);
-}
-
-.wire-card-amber::before {
-  background: rgba(255, 176, 0, 0.4);
-}
-
-.t-label {
-  font-size: 11px;
+/* Section headers (e.g. "NARRATIVE MATRIX") */
+.axiom-section-header {
+  font-size: 0.85rem;
   font-weight: 700;
-  letter-spacing: 0.08em;
+  letter-spacing: 0.15em;
+  text-transform: uppercase;
+  color: var(--green-bright);
+  border-bottom: 1px solid var(--green-muted);
+  padding-bottom: 0.4rem;
+  margin-bottom: 0.75rem;
+}
+
+/* Metric numbers (big stats) */
+.axiom-metric {
+  font-size: 1.4rem;
+  font-weight: 700;
+  color: var(--green-bright);
+  letter-spacing: 0.05em;
+}
+
+/* Labels next to metrics */
+.axiom-metric-label {
+  font-size: 0.8rem;
+  color: var(--text-meta);
+  letter-spacing: 0.1em;
   text-transform: uppercase;
 }
 
-.t-summary {
-  font-size: 11px;
-  color: #aaa;
-  line-height: 1.5;
+/* Signal badges: ↑ BULLISH / ↓ BEARISH / → NEUTRAL */
+.signal-bullish { color: var(--green-bright); font-weight: 700; }
+.signal-bearish { color: var(--red-signal);   font-weight: 700; }
+.signal-neutral { color: var(--cyan);         font-weight: 700; }
+
+/* Status badges */
+.badge {
+  font-size: 0.72rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  padding: 2px 7px;
+  border-radius: 2px;
+  text-transform: uppercase;
+}
+.badge-live    { background: rgba(0,255,65,0.15); color: var(--green-bright); border: 1px solid var(--green-mid);  }
+.badge-cached  { background: rgba(0,229,255,0.10); color: var(--cyan);        border: 1px solid var(--cyan);       }
+.badge-fallback{ background: rgba(255,179,0,0.12); color: var(--amber);       border: 1px solid var(--amber);      }
+
+/* LIVE pulsing dot */
+.live-dot {
+  display: inline-block;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--green-bright);
+  animation: live-pulse 1.1s ease-in-out infinite;
+  margin-right: 5px;
+  vertical-align: middle;
 }
 
-.t-metric-label {
-  font-size: 10px;
-  color: #666;
+/* Verdict panel — glows */
+.verdict-panel {
+  animation: glow-throb 3s ease-in-out infinite;
 }
 
-.t-metric-value {
-  font-size: 10px;
-  color: #bbb;
+/* Buttons */
+.btn-primary {
+  background: var(--green-bright);
+  color: #000;
+  font-family: var(--font-terminal);
+  font-size: 0.95rem;
+  font-weight: 700;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  padding: 0.55rem 1.4rem;
+  border: none;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: background var(--transition), box-shadow var(--transition), transform 80ms;
+}
+.btn-primary:hover {
+  background: #ffffff;
+  box-shadow: 0 0 16px rgba(0, 255, 65, 0.5);
+}
+.btn-primary:active { transform: scale(0.97); }
+
+.btn-secondary {
+  background: transparent;
+  color: var(--green-bright);
+  font-family: var(--font-terminal);
+  font-size: 0.9rem;
+  font-weight: 600;
+  letter-spacing: 0.1em;
+  text-transform: uppercase;
+  padding: 0.5rem 1.2rem;
+  border: 1px solid var(--green-muted);
+  border-radius: 2px;
+  cursor: pointer;
+  transition: border-color var(--transition), box-shadow var(--transition), color var(--transition);
+}
+.btn-secondary:hover {
+  border-color: var(--green-bright);
+  box-shadow: 0 0 10px rgba(0, 255, 65, 0.25);
+  color: #ffffff;
+}
+
+/* ═══════════════════════════════════════════════════════════
+   TAILWIND OVERRIDES
+   These force-correct anything Tailwind's dark defaults 
+   might render as low-contrast gray-on-dark.
+   ═══════════════════════════════════════════════════════════ */
+
+/* Kill all gray text classes — make them readable */
+.text-gray-400,
+.text-gray-500,
+.text-gray-600 {
+  color: var(--text-meta) !important;   /* #99ddaa — clearly visible on black */
+}
+
+.text-gray-300 {
+  color: var(--text-primary) !important;  /* near-white */
+}
+
+/* Any class using muted/slate on dark BG */
+.text-muted,
+.text-slate-400,
+.text-slate-500,
+.text-zinc-400,
+.text-zinc-500 {
+  color: var(--text-meta) !important;
+}
+
+/* Ensure green-400 and green-500 Tailwind classes stay bright */
+.text-green-400  { color: var(--green-bright) !important; }
+.text-green-500  { color: var(--green-mid)    !important; }
+.text-emerald-400{ color: var(--green-bright) !important; }
+
+/* Dark backgrounds should use our bg vars */
+.bg-black,
+.bg-gray-900,
+.bg-gray-950,
+.bg-zinc-900,
+.bg-zinc-950 {
+  background-color: var(--bg-base) !important;
+}
+
+.bg-gray-800,
+.bg-zinc-800 {
+  background-color: var(--bg-panel) !important;
+}
+
+/* Borders */
+.border-gray-700,
+.border-gray-800,
+.border-zinc-700,
+.border-zinc-800 {
+  border-color: var(--border) !important;
+}
+
+/* ── Input / search field ──────────────────────────────────── */
+input[type="text"],
+input[type="search"],
+textarea {
+  background: var(--bg-panel);
+  color: var(--text-primary);
+  border: 1px solid var(--green-muted);
+  border-radius: 2px;
+  font-family: var(--font-terminal);
+  font-size: 1rem;
+  padding: 0.55rem 0.9rem;
+  outline: none;
+  transition: border-color var(--transition), box-shadow var(--transition);
+  caret-color: var(--green-bright);
+}
+input[type="text"]:focus,
+input[type="search"]:focus,
+textarea:focus {
+  border-color: var(--green-bright);
+  box-shadow: 0 0 0 2px rgba(0, 255, 65, 0.15);
+}
+input::placeholder { color: var(--green-muted); }
+
+/* ── Δ-Sigma gauge ─────────────────────────────────────────── */
+.delta-gauge-track {
+  background: var(--border);
+  border-radius: 999px;
+  height: 6px;
+  overflow: hidden;
+}
+.delta-gauge-fill {
+  height: 100%;
+  border-radius: 999px;
+  transition: width 600ms cubic-bezier(0.25, 1, 0.5, 1);
+}
+
+/* ── Skeleton loading cards ────────────────────────────────── */
+.skeleton {
+  background: linear-gradient(
+    90deg,
+    var(--bg-card) 25%,
+    var(--border) 50%,
+    var(--bg-card) 75%
+  );
+  background-size: 200% 100%;
+  animation: skeleton-shimmer 1.6s ease-in-out infinite;
+  border-radius: 2px;
+}
+
+@keyframes skeleton-shimmer {
+  0%   { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── Status bar ────────────────────────────────────────────── */
+.status-bar {
+  font-size: 0.82rem;
+  color: var(--text-meta);
+  letter-spacing: 0.08em;
+  padding: 0.35rem 1rem;
+  border-top: 1px solid var(--border);
+  background: var(--bg-panel);
+}
+
+/* ── Featured carousel buttons ─────────────────────────────── */
+.carousel-btn {
+  font-size: 0.82rem;
+  font-family: var(--font-terminal);
+  letter-spacing: 0.08em;
+  padding: 0.3rem 0.75rem;
+  border-radius: 2px;
+  cursor: pointer;
+  transition: all var(--transition);
+  text-transform: uppercase;
   font-weight: 600;
 }
-
-.t-evidence {
-  font-size: 10px;
-  color: #00ff41;
-  text-decoration: underline;
-  text-underline-offset: 2px;
+.carousel-btn-cached {
+  background: rgba(0,229,255,0.08);
+  color: var(--cyan);
+  border: 1px solid rgba(0,229,255,0.3);
+}
+.carousel-btn-cached:hover {
+  background: rgba(0,229,255,0.15);
+  border-color: var(--cyan);
+}
+.carousel-btn-live {
+  background: var(--green-bright);
+  color: #000;
+  border: 1px solid var(--green-bright);
+}
+.carousel-btn-live:hover {
+  background: #fff;
+  box-shadow: 0 0 12px rgba(0,255,65,0.5);
 }
 
-.t-evidence:hover {
-  color: #ffb000;
-}
+/* ── Source card stagger delay (first 8 cards) ─────────────── */
+.axiom-card:nth-child(1) { animation-delay:  0ms; }
+.axiom-card:nth-child(2) { animation-delay: 60ms; }
+.axiom-card:nth-child(3) { animation-delay:120ms; }
+.axiom-card:nth-child(4) { animation-delay:180ms; }
+.axiom-card:nth-child(5) { animation-delay:240ms; }
+.axiom-card:nth-child(6) { animation-delay:300ms; }
+.axiom-card:nth-child(7) { animation-delay:360ms; }
+.axiom-card:nth-child(8) { animation-delay:420ms; }
 
-.metric-row {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-  padding: 2px 0;
-  border-bottom: 1px solid rgba(255, 255, 255, 0.03);
-}
-
-.metric-row:last-child {
-  border-bottom: none;
-}
-
-.signal-bullish { color: #00ff41; font-weight: 700; }
-.signal-bearish { color: #ff3333; font-weight: 700; }
-.signal-neutral { color: #666; font-weight: 700; }
-
-.badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 8px;
-  font-weight: 700;
-  letter-spacing: 0.1em;
-  padding: 2px 6px;
-  border-radius: 2px;
-}
-
-.badge-live {
-  border: 1px solid rgba(0, 255, 65, 0.5);
-  background: rgba(0, 255, 65, 0.08);
-  color: #00ff41;
-}
-
-.badge-cached {
-  border: 1px solid rgba(102, 102, 102, 0.4);
-  background: rgba(255, 255, 255, 0.03);
-  color: #666;
-}
-
-.badge-fallback {
-  border: 1px solid rgba(255, 176, 0, 0.4);
-  background: rgba(255, 176, 0, 0.07);
-  color: #ffb000;
-}
-
-.badge-failed {
-  border: 1px solid rgba(255, 51, 51, 0.5);
-  background: rgba(255, 51, 51, 0.08);
-  color: #ff3333;
-}
-
-.panel-header {
-  border-bottom: 1px solid #222;
-  padding: 8px 12px;
-  background: rgba(0, 255, 65, 0.02);
-}
-
-.panel-header-amber {
-  background: rgba(255, 176, 0, 0.02);
-}
-
-input[type="text"]:focus {
-  box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.3), 0 0 8px rgba(0, 255, 65, 0.1);
-}
-
-button:not(:disabled):hover {
-  box-shadow: 0 0 6px rgba(0, 255, 65, 0.15);
-}
-
-.scrollbar-thin::-webkit-scrollbar {
-  width: 3px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #222;
-  border-radius: 2px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #333;
-}
-
-@keyframes shimmer {
-  0% { opacity: 0.3; }
-  50% { opacity: 0.6; }
-  100% { opacity: 0.3; }
-}
-
-.skeleton-shimmer {
-  animation: shimmer 1.8s ease-in-out infinite;
-}
-
-.failed-card {
-  background: #0f0404;
-  border: 1px solid rgba(255, 51, 51, 0.3);
-  border-left: 2px solid rgba(255, 51, 51, 0.7);
-  padding: 10px 12px;
-}
-
-.section-divider {
-  border: none;
-  border-top: 1px solid #1a1a1a;
-  margin: 6px 0;
+/* ── Responsive font bumps ─────────────────────────────────── */
+@media (max-width: 768px) {
+  html { font-size: 15px; }
+  h1   { font-size: 1.6rem; }
+  h2   { font-size: 1.3rem; }
+  .axiom-metric { font-size: 1.2rem; }
 }
