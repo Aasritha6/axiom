@@ -182,7 +182,8 @@ export default function Home() {
   useEffect(() => {
     if (hasAutoLoaded.current || hasUserInteracted.current) return;
     hasAutoLoaded.current = true;
-    loadDemo("cursor");
+    const timer = setTimeout(() => loadDemo("cursor"), 500);
+    return () => clearTimeout(timer);
   }, [loadDemo]);
 
   const markInteracted = () => {
