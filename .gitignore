@@ -1,0 +1,32 @@
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Next.js
+/.next/
+/out/
+
+# Env — never commit secrets
+.env*
+!.env.example
+
+# Debug
+npm-debug.log*
+.DS_Store
+*.pem
+
+# Typescript
+next-env.d.ts
+*.tsbuildinfo
+
+# Vercel
+.vercel
+
+# Wire result cache (2h TTL)
+.cache/
