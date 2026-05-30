@@ -117,11 +117,13 @@ export async function resolveAnakinWire(
   throw new Error(`Pipeline timeout for ${actionId}`);
 }
 
-/** Public Reddit JSON — no API key required */
 export async function fetchRedditFallback(query: string): Promise<unknown> {
-  const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=10`;
+  const url = `https://www.reddit.com/search.json?q=${encodeURIComponent(query)}&limit=10&sort=relevance&t=month`;
   const res = await fetch(url, {
-    headers: { "User-Agent": "AxiomTerminal/1.0" },
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      "Accept": "application/json",
+    },
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Reddit fallback failed: ${res.status}`);
@@ -130,10 +132,14 @@ export async function fetchRedditFallback(query: string): Promise<unknown> {
 
 /** Yahoo Finance chart API — no API key required */
 export async function fetchYahooFinanceFallback(query: string): Promise<unknown> {
-  const symbol = query.split(/\s+/)[0].toUpperCase();
-  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo`;
+  const symbol = guessTicker(query);
+  const url = `https://query1.finance.yahoo.com/v8/finance/chart/${encodeURIComponent(symbol)}?interval=1d&range=1mo&includePrePost=false`;
   const res = await fetch(url, {
-    headers: { "User-Agent": "AxiomTerminal/1.0" },
+    headers: {
+      "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/124.0.0.0 Safari/537.36",
+      "Accept": "application/json",
+      "Referer": "https://finance.yahoo.com",
+    },
     cache: "no-store",
   });
   if (!res.ok) throw new Error(`Yahoo Finance fallback failed: ${res.status}`);
