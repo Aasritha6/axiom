@@ -122,22 +122,21 @@ Ticker resolution for finance (`guessTicker`): known aliases (e.g. `tesla` → `
 
 ### Per-source extraction (`lib/extractors.ts`)
 
-1. **`collectReadableText()`** — Recursively walks Wire JSON, scanning only human-readable fields: `title`, `body`, `description`, `summary`, `headline`, `selftext`, `comment`, etc.
-2. **Keyword matcher** — Word-boundary regex against two lists:
-   - **Hype words** (narrative): `revolutionary`, `breakthrough`, `game-changer`, `disrupt`, …
-   - **Stress words** (reality): `bankrupt`, `layoff`, `crash`, `decline`, `refund`, …
-3. **Signal mapping** — `score > 0.15` → BULLISH · `score < −0.15` → BEARISH · else NEUTRAL (default `0.0`, no bullish bias).
-4. **Evidence links** — Up to 3 URLs extracted from `url`, `link`, `permalink`, `html_url` fields per card.
+1. **`collectReadableText()`** — Recursively walks Wire JSON, scanning only human-readable fields.
+2. **Keyword matcher** — Hype words (narrative), stress + growth words (reality), word-boundary regex.
+3. **Structured reality scoring** — Finance parses price-change % from JSON; GitHub uses repo count + stars; Amazon uses lowest rating; hiring uses company count tiers.
+4. **Volume amplification** — High narrative volume boosts hype score only when keywords are present.
+5. **Signal mapping** — `score > 0.12` → BULLISH · `score < −0.12` → BEARISH · else NEUTRAL.
 
 ### Δ-Sigma metric
 
 ```
-avgN  = mean(narrative source sentiments)
-avgR  = mean(reality source sentiments)
-Δ-Sigma = (avgN × 0.6) − (avgR × 1.4)
+avgN  = volume-weighted mean(narrative sentiments)
+avgR  = volume-weighted mean(reality sentiments)
+Δ-Sigma = clamp((avgN × 0.6) − (avgR × 1.4), −2, +2)
 ```
 
-Reality is weighted 1.4× because operational signals (finance, code, hiring) are treated as stronger ground-truth indicators than promotional language.
+Reality can score **positive** (strong GitHub activity, good ratings, hiring) — pushing Δ-Sigma toward the reality side.
 
 | Δ-Sigma | Gauge interpretation |
 |:--------|:---------------------|

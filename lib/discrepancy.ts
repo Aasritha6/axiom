@@ -66,7 +66,8 @@ function buildHemisphere(
 
 function decisionTreeVerdict(
   narrative: HemisphereVerdict,
-  reality: HemisphereVerdict
+  reality: HemisphereVerdict,
+  delta: number
 ): { label: string; risk: string; explanation: string } {
   if (!narrative.sufficient || !reality.sufficient) {
     return {
@@ -85,32 +86,81 @@ function decisionTreeVerdict(
     reality.volumeLevel === "low" ||
     reality.counts.bearish > reality.counts.bullish;
 
+  let result: { label: string; risk: string; explanation: string };
+
   if (nHigh && rWeak) {
-    return {
+    result = {
       label: "HYPE DOMINATES REALITY",
       risk: "EXTREME",
       explanation: `Narrative: ${narrative.counts.bullish}↑ ${narrative.counts.bearish}↓ · Reality: ${reality.counts.bullish}↑ ${reality.counts.bearish}↓ — loud story, weak execution.`,
     };
-  }
-  if (nLow && rStrong) {
-    return {
+  } else if (nLow && rStrong) {
+    result = {
       label: "REALITY EXCEEDS HYPE",
       risk: "UNDERVALUED",
       explanation: `Quiet narrative but strong reality metrics (${reality.totalVolume} data points).`,
     };
-  }
-  if (narrative.counts.bullish > reality.counts.bullish + 1) {
-    return {
+  } else if (narrative.counts.bullish > reality.counts.bullish + 1) {
+    result = {
       label: "NARRATIVE DEVIATION",
       risk: "MODERATE",
       explanation: `Narrative leads by ${narrative.counts.bullish - reality.counts.bullish} bullish signal(s).`,
     };
+  } else {
+    result = {
+      label: "CONSENSUS ALIGNED",
+      risk: "LOW",
+      explanation: "Narrative and reality signals are in equilibrium.",
+    };
   }
-  return {
-    label: "CONSENSUS ALIGNED",
-    risk: "LOW",
-    explanation: "Narrative and reality signals are in equilibrium.",
-  };
+
+  // Δ-Sigma refinement — align gauge with verdict label
+  if (delta >= 0.75 && rWeak && result.label !== "HYPE DOMINATES REALITY") {
+    return {
+      label: "HYPE DOMINATES REALITY",
+      risk: "EXTREME",
+      explanation: `Δ-Sigma +${delta.toFixed(2)} confirms narrative-reality divergence.`,
+    };
+  }
+  if (delta <= -0.75 && nLow && result.label !== "REALITY EXCEEDS HYPE") {
+    return {
+      label: "REALITY EXCEEDS HYPE",
+      risk: "UNDERVALUED",
+      explanation: `Δ-Sigma ${delta.toFixed(2)} — substance ahead of story.`,
+    };
+  }
+  if (result.label === "CONSENSUS ALIGNED") {
+    if (delta > 0.45) {
+      return {
+        label: "NARRATIVE DEVIATION",
+        risk: "MODERATE",
+        explanation: `Δ-Sigma +${delta.toFixed(2)} — narrative sentiment ahead of reality.`,
+      };
+    }
+    if (delta < -0.45) {
+      return {
+        label: "REALITY EXCEEDS HYPE",
+        risk: "UNDERVALUED",
+        explanation: `Δ-Sigma ${delta.toFixed(2)} — operational signals stronger than coverage.`,
+      };
+    }
+  }
+
+  return result;
+}
+
+/** Volume-weighted mean — sources with more data points count more */
+function weightedAvgSentiment(results: SourceResult[]): number {
+  if (results.length === 0) return 0;
+  const totalWeight = results.reduce(
+    (sum, r) => sum + Math.max(r.volume, 1),
+    0
+  );
+  const weighted = results.reduce(
+    (sum, r) => sum + r.sentiment * Math.max(r.volume, 1),
+    0
+  );
+  return weighted / totalWeight;
 }
 
 export function calculateVerdict(
@@ -123,11 +173,19 @@ export function calculateVerdict(
   const narrative = buildHemisphere(narrativeResults, minSourcesPerHemisphere);
   const reality = buildHemisphere(realityResults, minSourcesPerHemisphere);
 
+  const weightedDelta = calculateWeightedDelta(results);
   const signalGap = narrative.counts.bullish - reality.counts.bullish;
-  const { label, risk, explanation } = decisionTreeVerdict(narrative, reality);
+  const { label, risk, explanation } = decisionTreeVerdict(
+    narrative,
+    reality,
+    weightedDelta.delta
+  );
 
   const totalSources = results.length;
   const maxSources = 8;
+  const totalVolume = narrative.totalVolume + reality.totalVolume;
+  const coverageScore = (totalSources / maxSources) * 70;
+  const volumeScore = Math.min(totalVolume / 300, 1) * 30;
 
   return {
     narrative,
@@ -135,7 +193,7 @@ export function calculateVerdict(
     signalGap,
     verdictLabel: label,
     riskLevel: risk,
-    confidence: Math.min(Math.round((totalSources / maxSources) * 100), 100),
+    confidence: Math.min(Math.round(coverageScore + volumeScore), 100),
     narrativeMomentum: narrative.counts.bullish - narrative.counts.bearish,
     realityMomentum: reality.counts.bullish - reality.counts.bearish,
     explanation,
@@ -155,14 +213,13 @@ export function calculateWeightedDelta(
   const narrative = results.filter((r) => r.category === "NARRATIVE");
   const reality = results.filter((r) => r.category === "REALITY");
 
-  const avgN =
-    narrative.reduce((a, c) => a + c.sentiment, 0) / (narrative.length || 1);
-  const avgR =
-    reality.reduce((a, c) => a + c.sentiment, 0) / (reality.length || 1);
+  const avgN = weightedAvgSentiment(narrative);
+  const avgR = weightedAvgSentiment(reality);
 
   const meanNarrative = parseFloat((avgN * 0.6).toFixed(2));
   const meanReality = parseFloat((avgR * 1.4).toFixed(2));
-  const delta = parseFloat((meanNarrative - meanReality).toFixed(2));
+  const rawDelta = meanNarrative - meanReality;
+  const delta = parseFloat(Math.max(-2, Math.min(2, rawDelta)).toFixed(2));
 
   return { delta, meanNarrative, meanReality };
 }
