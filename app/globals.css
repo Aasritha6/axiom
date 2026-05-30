@@ -1,205 +1,71 @@
 @import "tailwindcss";
 
-/* ═══════════════════════════════════════════════
-   AXIOM globals.css — full replacement
-   Fix: dark bg + ALL text bright & readable
-   Fix: font sizes bumped up
-   Fix: card entrance animations
-   ═══════════════════════════════════════════════ */
+/* ═══════════════════════════════════════════════════════════
+   AXIOM globals.css — minimal surgical fix
+   
+   ONLY changes: gray text → readable green-tinted text
+   NOTHING ELSE TOUCHED: no layout, no sizing, no display
+   ═══════════════════════════════════════════════════════════ */
 
-body {
-  background-color: #060906;
-  color: #e2ffe2;
-  font-family: 'Courier New', Courier, monospace;
-  font-size: 15px;
-  line-height: 1.65;
-  min-height: 100vh;
-  overflow-x: hidden;
-}
-
-/* ── scrollbar ── */
 ::-webkit-scrollbar       { width: 5px; }
-::-webkit-scrollbar-track { background: #060906; }
+::-webkit-scrollbar-track { background: #000; }
 ::-webkit-scrollbar-thumb { background: #1a4a1a; border-radius: 2px; }
 ::-webkit-scrollbar-thumb:hover { background: #00cc33; }
 ::selection { background: #00cc33; color: #000; }
 
-/* ══════════════════════════════════════
-   CORE FIX: Kill every gray-text class.
-   These are the classes your TSX files
-   use that cause the readability problem.
-   ══════════════════════════════════════ */
+/* ── The only fix: gray text → readable on dark background ── */
 
-/* Hard override — any Tailwind gray on dark bg */
-.text-gray-200 { color: #e2ffe2 !important; }
-.text-gray-300 { color: #d4f0d4 !important; }
-.text-gray-400 { color: #b0deb0 !important; }
-.text-gray-500 { color: #99d699 !important; }
-.text-gray-600 { color: #7ac87a !important; }
+.text-gray-300 { color: #c8f0c8 !important; }
+.text-gray-400 { color: #a8d8a8 !important; }
+.text-gray-500 { color: #88c088 !important; }
+.text-gray-600 { color: #6aaa6a !important; }
 
-.text-slate-200 { color: #e2ffe2 !important; }
-.text-slate-300 { color: #d4f0d4 !important; }
-.text-slate-400 { color: #b0deb0 !important; }
-.text-slate-500 { color: #99d699 !important; }
+.text-slate-300 { color: #c8f0c8 !important; }
+.text-slate-400 { color: #a8d8a8 !important; }
+.text-slate-500 { color: #88c088 !important; }
 
-.text-zinc-200 { color: #e2ffe2 !important; }
-.text-zinc-300 { color: #d4f0d4 !important; }
-.text-zinc-400 { color: #b0deb0 !important; }
-.text-zinc-500 { color: #99d699 !important; }
+.text-zinc-300 { color: #c8f0c8 !important; }
+.text-zinc-400 { color: #a8d8a8 !important; }
+.text-zinc-500 { color: #88c088 !important; }
 
-/* white with opacity — also show as mint not faded */
-.text-white\/80, .text-white\/70 { color: #e2ffe2 !important; opacity: 1 !important; }
-.text-white\/60, .text-white\/50 { color: #d4f0d4 !important; opacity: 1 !important; }
-.text-white\/40 { color: #b0deb0 !important; opacity: 1 !important; }
+/* white with opacity — show as visible mint instead of faded */
+.text-white\/80 { color: #e2ffe2 !important; opacity: 1 !important; }
+.text-white\/70 { color: #d4f0d4 !important; opacity: 1 !important; }
+.text-white\/60 { color: #c8f0c8 !important; opacity: 1 !important; }
+.text-white\/50 { color: #b0deb0 !important; opacity: 1 !important; }
+.text-white\/40 { color: #99cc99 !important; opacity: 1 !important; }
 
-/* Green text — make sure it's actually bright */
-.text-green-200 { color: #c8ffc8 !important; }
-.text-green-300 { color: #b8ffb8 !important; }
-.text-green-400 { color: #00ff41 !important; }
-.text-green-500 { color: #00cc33 !important; }
-.text-emerald-400 { color: #00ff41 !important; }
-.text-emerald-500 { color: #00cc33 !important; }
+/* ── Animations — purely additive, touch nothing existing ── */
 
-/* ── Font sizes — bump everything up ── */
-.text-xs  { font-size: 0.82rem !important; }   /* was 0.75 → now 13px */
-.text-sm  { font-size: 0.92rem !important; }   /* was 0.875 → now ~15px */
-.text-base{ font-size: 1rem    !important; }
-.text-lg  { font-size: 1.12rem !important; }
-.text-xl  { font-size: 1.25rem !important; }
-.text-2xl { font-size: 1.5rem  !important; }
-
-/* ── Backgrounds — unify to true dark ── */
-.bg-gray-900, .bg-gray-950,
-.bg-zinc-900, .bg-zinc-950,
-.bg-black { background-color: #0a0f0a !important; }
-
-.bg-gray-800, .bg-zinc-800,
-.bg-gray-800\/50, .bg-zinc-800\/50 { background-color: #111811 !important; }
-
-.bg-gray-700, .bg-zinc-700 { background-color: #162016 !important; }
-
-/* ── Borders — subtle green instead of gray ── */
-.border-gray-700, .border-gray-800, .border-gray-900,
-.border-zinc-700, .border-zinc-800, .border-zinc-900 {
-  border-color: #1c3a1c !important;
-}
-.border-green-900\/30, .border-green-900\/50 {
-  border-color: #1c3a1c !important;
-}
-
-/* ══════════════════════════════════════
-   ANIMATIONS
-   ══════════════════════════════════════ */
-
-/* Card entrance */
 @keyframes card-in {
   from { opacity: 0; transform: translateY(8px); }
-  to   { opacity: 1; transform: translateY(0);   }
+  to   { opacity: 1; transform: translateY(0); }
 }
 
-/* LIVE dot blink */
 @keyframes live-blink {
-  0%, 100% { opacity: 1;    }
+  0%, 100% { opacity: 1; }
   50%       { opacity: 0.1; }
 }
 
-/* Verdict panel glow */
 @keyframes glow-throb {
-  0%, 100% { box-shadow: 0 0 6px rgba(0,255,65,0.12); }
-  50%       { box-shadow: 0 0 22px rgba(0,255,65,0.32); }
+  0%, 100% { box-shadow: 0 0 5px rgba(0,255,65,0.10); }
+  50%       { box-shadow: 0 0 20px rgba(0,255,65,0.28); }
 }
 
-/* Skeleton shimmer — replaces plain pulse */
 @keyframes shimmer {
   0%   { background-position: 200% 0; }
   100% { background-position: -200% 0; }
 }
 
-/* ── Source cards animate in ── */
-/* Targets the card wrappers that have both a border and rounded class */
-.border.rounded,
-[class~="border"][class~="rounded"],
-[class~="border-green-900"],
-[class~="border-gray-800"] {
-  animation: card-in 320ms ease both;
-}
+/* opt-in classes — add these to elements in TSX to get animations */
+.animate-card-in       { animation: card-in 300ms ease both; }
+.animate-live          { animation: live-blink 1.1s ease-in-out infinite; }
+.animate-verdict-glow  { animation: glow-throb 3s ease-in-out infinite; }
 
-/* Stagger the first several cards */
-.border:nth-child(1) { animation-delay:  0ms; }
-.border:nth-child(2) { animation-delay: 55ms; }
-.border:nth-child(3) { animation-delay:110ms; }
-.border:nth-child(4) { animation-delay:165ms; }
-
-/* ── LIVE dot pulse ── */
-/* Any small rounded-full green circle = the live indicator */
-[class*="rounded-full"][class*="green"][class*="w-2"],
-[class*="rounded-full"][class*="green"][class*="h-2"] {
-  animation: live-blink 1.1s ease-in-out infinite !important;
-}
-
-/* ── Override Tailwind's animate-pulse to shimmer ── */
+/* skeleton shimmer */
 .animate-pulse {
   background: linear-gradient(90deg,
-    #111811 25%,
-    #1e2e1e 50%,
-    #111811 75%) !important;
+    #111811 25%, #1c301c 50%, #111811 75%) !important;
   background-size: 200% 100% !important;
   animation: shimmer 1.6s ease-in-out infinite !important;
-}
-
-/* ── Verdict panel glow — add class "verdict-glow" to the panel div ── */
-.verdict-glow {
-  animation: glow-throb 3s ease-in-out infinite;
-}
-
-/* ══════════════════════════════════════
-   SPECIFIC PROBLEM AREAS (from screenshot)
-   ══════════════════════════════════════ */
-
-/* Forensic synthesis text block — center panel */
-/* The paragraph that explains the verdict */
-.leading-relaxed {
-  color: #d4f0d4 !important;
-  font-size: 0.88rem !important;
-  line-height: 1.7  !important;
-}
-
-/* Metric rows inside source cards */
-/* e.g. "Articles (7d)  18" and "Hype keywords  2" */
-/* The label column */
-.flex.justify-between .text-xs:first-child {
-  color: #99d699 !important;
-}
-/* The value column */
-.flex.justify-between .text-xs:last-child {
-  color: #e2ffe2 !important;
-  font-weight: 600;
-}
-
-/* "narrative bullish = reality bullish" caption under signal gap */
-.text-center {
-  color: #b0deb0 !important;
-}
-
-/* "-2 REALITY" and "+2 HYPE" gauge end labels */
-.text-red-400\/70  { color: #ff6666 !important; opacity: 1 !important; }
-.text-green-400\/70{ color: #00cc33 !important; opacity: 1 !important; }
-
-/* Input field */
-input {
-  background-color: #0d140d !important;
-  color: #e2ffe2 !important;
-  font-size: 0.95rem !important;
-}
-input::placeholder { color: #4a7a4a !important; }
-
-/* Links */
-a { color: #00ff41; }
-a:hover { color: #fff; text-shadow: 0 0 8px #00ff41; }
-
-/* Mobile */
-@media (max-width: 768px) {
-  body { font-size: 14px; }
-  .text-xs  { font-size: 0.8rem  !important; }
-  .text-sm  { font-size: 0.88rem !important; }
 }
