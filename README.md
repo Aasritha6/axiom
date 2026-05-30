@@ -1,128 +1,227 @@
-# ◈ AXIOM — Narrative vs. Ground Truth Terminal
+<p align="center">
+  <strong>◈ AXIOM</strong><br/>
+  <em>Narrative vs. Ground Truth — Forensic Intelligence Terminal</em>
+</p>
 
-> **Forensic intelligence for the hype age.** Axiom exposes the mathematical divergence between manufactured public narrative and verifiable operational reality — built for the [Anakin.io](https://anakin.io) Build-a-thon.
+<p align="center">
+  Built for the <a href="https://anakin.io">Anakin.io</a> Build-a-thon · Next.js 15 · Anakin Wire · Server-Sent Events
+</p>
 
-**Live demo:** Deploy to Vercel (see [Deploy](#deploy-to-vercel)) · **Repo:** [github.com/Aasritha6/axiom](https://github.com/Aasritha6/axiom)
+---
+
+## About
+
+**Axiom** is a real-time forensic intelligence terminal that quantifies the gap between **public narrative** (media, social, video hype) and **operational reality** (finance, commerce, code, hiring). Given any company or product name, Axiom dispatches eight parallel [Anakin Wire](https://anakin.io) scrapers, scores each data source independently, and produces a auditable verdict: whether story exceeds substance, or substance exceeds story.
+
+The interface is inspired by Bloomberg terminals — pure black, monospace typography, high information density — designed for analysts, investors, and researchers who need evidence-backed divergence metrics, not another opaque sentiment score.
 
 ---
 
 ## The Problem
 
-Every major product launch follows the same arc: loud media narrative, influencer amplification, and bullish headlines — while GitHub commits flatline, hiring freezes, and reviews collapse. Investors and consumers have no single view that compares **story** vs **substance**.
+Markets and media operate on two disconnected layers:
 
-**Axiom** is a Bloomberg-style forensic terminal that runs eight parallel [Anakin Wire](https://anakin.io) scrapers, scores narrative vs. reality hemispheres, and renders a quantified **Δ-Sigma verdict** with optional Gemini synthesis.
+| Layer | What it captures | Typical sources |
+|-------|------------------|-----------------|
+| **Narrative** | Promotional language, viral coverage, influencer amplification | News, Reddit, YouTube |
+| **Reality** | Transactional execution, hiring, code activity, market data | Finance APIs, Amazon, GitHub, job boards |
 
----
-
-## How It Works
-
-```
-┌─────────────────────────────────────────────────────────────────┐
-│  USER QUERY  ──►  SSE /api/axiom/stream                         │
-└────────────────────────────┬────────────────────────────────────┘
-                             │
-         ┌───────────────────┼───────────────────┐
-         ▼                   ▼                   ▼
-   NARRATIVE (×4)       VERDICT ENGINE      REALITY (×4)
-   gn_search            Signal counts       yf_quote
-   gn_related           Δ-Sigma gauge       am_search_products
-   rt_search            Gemini prose        gh_search_repos
-   yt_search                                yc_search_companies
-         │                   │                   │
-         └───────────────────┴───────────────────┘
-                             ▼
-              HYPE DOMINATES · ALIGNED · REALITY EXCEEDS
-```
-
-1. **Dispatch** — Eight Wire actions fire in parallel via `POST /v1/wire/task`.
-2. **Extract** — Rule-based keyword scoring on readable text fields only (not raw JSON).
-3. **Synthesize** — Signal-count decision tree + weighted Δ-Sigma (`narrative × 0.6 − reality × 1.4`).
-4. **Stream** — Results arrive as SSE events; UI shows LIVE / WIRE CACHE / FAILED badges per source.
+Existing tools either aggregate sentiment into a single opaque number, or display raw feeds without synthesis. **Axiom** splits the internet into two hemispheres, scores each source with reproducible rules, and exposes the divergence as a first-class metric — **Δ-Sigma**.
 
 ---
 
-## Tech Stack
+## What Makes Axiom Different
 
-| Layer | Technology |
-|-------|------------|
-| Framework | Next.js 15 (App Router), React 19, TypeScript |
-| Styling | Tailwind CSS v4, monospace terminal theme |
-| Data | Anakin Wire API (8 verified actions) |
-| Streaming | Server-Sent Events (SSE) |
-| Synthesis | Google Gemini Flash (optional, free tier) |
-| Cache | In-memory Wire cache (2h TTL, serverless-safe) |
+| Capability | Typical sentiment dashboard | Axiom |
+|------------|----------------------------|-------|
+| Data sourcing | Single API or manual copy-paste | **8 parallel Anakin Wire actions** with fallbacks |
+| Scoring | Black-box ML or LLM-per-source | **Rule-based keyword extraction** on readable text fields only |
+| Transparency | One combined score | **Per-source LIVE / CACHED / FAILED badges** + evidence URLs |
+| Verdict | Subjective summary | **Signal-count decision tree** + weighted **Δ-Sigma gauge** |
+| Narration | Required LLM credits | **Optional Gemini synthesis**; core math runs without any LLM |
+| Demo reliability | Depends on live API uptime | **Curated demo matrices** + 2-hour Wire cache + live mode toggle |
+
+Axiom does not ask users to trust a model. It shows what each wire returned, how it was scored, and why the verdict follows.
+
+---
+
+## Architecture
+
+### System overview
+
+```mermaid
+flowchart TB
+    subgraph Client["Browser (React 19)"]
+        UI["Terminal UI"]
+        ES["EventSource Client"]
+    end
+
+    subgraph Server["Next.js App Router"]
+        SSE["/api/axiom/stream"]
+        VE["Verdict Engine"]
+        EX["Extractors"]
+        GC["Gemini Synthesis (optional)"]
+    end
+
+    subgraph Anakin["Anakin Wire API"]
+        W1["gn_search"]
+        W2["gn_related"]
+        W3["rt_search"]
+        W4["yt_search"]
+        W5["yf_quote"]
+        W6["am_search_products"]
+        W7["gh_search_repos"]
+        W8["yc_search_companies"]
+    end
+
+    UI --> ES
+    ES <-->|SSE| SSE
+    SSE --> W1 & W2 & W3 & W4 & W5 & W6 & W7 & W8
+    SSE --> EX --> VE
+    VE --> GC
+    SSE -->|wire_resolved / final_verdict| ES
+```
+
+### Split-brain data model
+
+```mermaid
+flowchart LR
+    subgraph Narrative["📢 Narrative Hemisphere"]
+        N1["Google News Search"]
+        N2["Related Coverage"]
+        N3["Reddit Search"]
+        N4["YouTube Search"]
+    end
+
+    subgraph Reality["🌍 Reality Hemisphere"]
+        R1["Yahoo Finance Quote"]
+        R2["Amazon Products"]
+        R3["GitHub Repos"]
+        R4["YC Hiring Companies"]
+    end
+
+    Narrative --> ENG["Discrepancy Engine"]
+    Reality --> ENG
+    ENG --> OUT["Δ-Sigma · Signal Gap · Verdict Label"]
+```
+
+### Request lifecycle
+
+1. **Query intake** — User submits a target (e.g. `Byju's`, `Cursor`, custom text).
+2. **Parallel dispatch** — Eight Wire tasks POST to `https://anakin.io/v1/wire/task`; results polled via `/v1/wire/jobs/{id}`.
+3. **Extraction** — Each payload passes through source-specific extractors. Sentiment is derived from keyword density on **title, body, description** fields — never raw JSON keys.
+4. **Aggregation** — Signal counts (`BULLISH` / `BEARISH` / `NEUTRAL`) feed a decision tree; weighted Δ-Sigma is computed for the gauge.
+5. **Streaming** — Results emit over SSE as `wire_resolved` events; final `final_verdict` includes optional Gemini prose.
+6. **Caching** — Successful Wire responses cache in-memory for 2 hours (serverless-safe). Curated demo matrices bypass Wire for instant presentation.
 
 ---
 
 ## Anakin Wire Integration
 
-All eight sources verified via `GET /v1/wire/catalog/{slug}`:
+All eight Wire action IDs were verified against the Anakin catalog (`GET /v1/wire/catalog/{slug}`).
 
-| Hemisphere | Source | Action ID | Catalog |
-|------------|--------|-----------|---------|
-| **Narrative** | Google News Search | `gn_search` | google_news |
-| **Narrative** | Related Coverage | `gn_related` | google_news |
-| **Narrative** | Reddit Search | `rt_search` | reddit |
-| **Narrative** | YouTube Search | `yt_search` | youtube |
-| **Reality** | Yahoo Finance Quote | `yf_quote` | yahoo_finance |
-| **Reality** | Amazon Products | `am_search_products` | amazon |
-| **Reality** | GitHub Repos | `gh_search_repos` | github |
-| **Reality** | YC Hiring | `yc_search_companies` | ycombinator |
+| Hemisphere | Label | Action ID | Catalog |
+|:-----------|:------|:----------|:--------|
+| Narrative | Google News Search | `gn_search` | google_news |
+| Narrative | Related Coverage | `gn_related` | google_news |
+| Narrative | Reddit Search | `rt_search` | reddit |
+| Narrative | YouTube Search | `yt_search` | youtube |
+| Reality | Yahoo Finance Quote | `yf_quote` | yahoo_finance |
+| Reality | Amazon Products | `am_search_products` | amazon |
+| Reality | GitHub Repos | `gh_search_repos` | github |
+| Reality | YC Hiring Companies | `yc_search_companies` | ycombinator |
 
-**Fallbacks:** Reddit public JSON, Yahoo Finance chart API (no credits burned).
-
-```bash
-npm run recon -- --test "Byju's"   # smoke-test all 8 wires
-npm run catalog                    # re-fetch full Anakin catalog
-```
+Public fallbacks (Reddit JSON, Yahoo Finance chart) activate automatically when a Wire action fails, preserving partial results rather than aborting the scan.
 
 ---
 
 ## Verdict Engine
 
-### Signal counts (primary)
-Each source → `BULLISH` / `BEARISH` / `NEUTRAL` via keyword density on title/body fields.
+### Per-source scoring
 
-### Δ-Sigma (display gauge)
+Each Wire response is reduced to a discrete signal:
+
+- **BULLISH** — promotional keyword density above threshold (narrative sources)
+- **BEARISH** — stress keyword density above threshold (reality sources)
+- **NEUTRAL** — no keyword match (default; avoids false-positive hype bias)
+
+Keywords use word-boundary matching on extracted text only (`collectReadableText`), preventing false triggers from JSON field names like `future_price`.
+
+### Δ-Sigma metric
+
 ```
-avgN = mean(narrative sentiments)
-avgR = mean(reality sentiments)
+avgN  = mean(narrative source sentiments)
+avgR  = mean(reality source sentiments)
 Δ-Sigma = (avgN × 0.6) − (avgR × 1.4)
 ```
 
-| Δ-Sigma | Verdict |
-|---------|---------|
-| > +0.5 | HYPE DOMINATES REALITY |
-| −0.5 to +0.5 | CONSENSUS ALIGNED |
-| < −0.5 | REALITY EXCEEDS HYPE |
+| Δ-Sigma range | Verdict |
+|:--------------|:--------|
+| > +0.5 | **HYPE DOMINATES REALITY** |
+| −0.5 to +0.5 | **CONSENSUS ALIGNED** |
+| < −0.5 | **REALITY EXCEEDS HYPE** |
 
-### Gemini synthesis (optional)
-Adds Bloomberg-style prose ending with: `ESTIMATED RISK EXPOSURE: $X`
+The UI renders Δ-Sigma on a −2 to +2 gauge with a glowing position indicator. A separate **signal gap** (narrative bullish count minus reality bullish count) provides a discrete, auditable secondary metric.
 
----
+### Optional synthesis
 
-## Featured Demo Queries
-
-| Query | Story | Expected Verdict |
-|-------|-------|------------------|
-| **Byju's** | India's $22B edtech hype → NCLT insolvency | HYPE DOMINATES |
-| **Cursor** | Quiet narrative, massive GitHub/hiring reality | REALITY EXCEEDS |
-| **Humane AI Pin** | Peak launch hype, zero execution | HYPE DOMINATES |
-| **Tesla FSD** | Polarizing, high-variance | CONSENSUS / DEVIATION |
-| **WeWork** | Unicorn narrative vs bankruptcy | HYPE DOMINATES |
-
-Each card offers **📦 CACHED** (instant curated demo) and **⚡ RUN LIVE** (real Wire calls).
+When `GEMINI_API_KEY` is configured, Gemini Flash generates a concise forensic summary ending with `ESTIMATED RISK EXPOSURE: [figure]`. The verdict math remains rule-based regardless of LLM availability.
 
 ---
 
-## Local Setup
+## Interface
+
+Axiom presents a 12-column terminal grid:
+
+| Region | Role |
+|--------|------|
+| **Left panel** | Narrative Matrix — live cards for news, social, related, YouTube |
+| **Center panel** | Forensic Synthesis — Δ-Sigma gauge, verdict label, signal bars, copy button |
+| **Right panel** | Ground Reality Atomizer — finance, Amazon, GitHub, hiring |
+| **Header** | Source counter (`8 sources · N live · N resolved`) |
+| **Carousel** | Featured queries with **Cached** and **Run Live** modes |
+
+Each source card displays: signal direction, status badge (`LIVE` · `WIRE CACHE` · `FALLBACK` · `FAILED`), metric rows, and up to three **View source →** evidence links.
+
+---
+
+## Example Analyses
+
+| Target | Narrative signal | Reality signal | Typical verdict |
+|--------|------------------|----------------|-----------------|
+| **Byju's** | 480 peak articles, national edtech hype | $22B → insolvency, 10k+ layoffs | Hype dominates |
+| **Cursor** | Quiet coverage (18 articles) | 340 GitHub repos, 89 hiring companies | Reality exceeds |
+| **Humane AI Pin** | Influencer launch frenzy | Flat commits, 2.1★ reviews, hiring freeze | Hype dominates |
+| **WeWork** | Peak unicorn narrative | Bankruptcy, valuation collapse | Hype dominates |
+
+These scenarios ship as curated demo matrices for instant playback; the same pipeline runs live against Anakin Wire when **Run Live** is selected.
+
+---
+
+## Tech Stack
+
+| Component | Technology |
+|-----------|------------|
+| Framework | Next.js 15 (App Router), React 19, TypeScript |
+| Styling | Tailwind CSS v4 |
+| Real-time transport | Server-Sent Events (SSE) |
+| Data layer | Anakin Wire API (`X-API-Key` auth) |
+| Scoring | Rule-based extractors (`lib/extractors.ts`) |
+| Verdict logic | Signal-count tree + weighted Δ-Sigma (`lib/discrepancy.ts`) |
+| Prose layer | Google Gemini Flash (optional) |
+| Cache | In-memory Map, 2-hour TTL |
+
+---
+
+## Getting Started
 
 ### Prerequisites
-- Node.js 18+
-- Anakin API key ([anakin.io](https://anakin.io))
-- Gemini API key optional ([aistudio.google.com/apikey](https://aistudio.google.com/apikey))
 
-### Install
+- Node.js 18+
+- [Anakin API key](https://anakin.io)
+- [Gemini API key](https://aistudio.google.com/apikey) (optional)
+
+### Installation
 
 ```bash
 git clone https://github.com/Aasritha6/axiom.git
@@ -131,90 +230,46 @@ npm install
 cp .env.example .env.local
 ```
 
-### Environment variables (`.env.local`)
+Configure environment variables in `.env.local`:
 
-```bash
-ANAKIN_API_KEY="your_anakin_key"
-GEMINI_API_KEY="your_gemini_key"   # optional but recommended for demo
+```env
+ANAKIN_API_KEY=<anakin-api-key>
+GEMINI_API_KEY=<gemini-api-key>
 ```
 
-### Run
+### Development
 
 ```bash
 npm run dev
-# → http://localhost:3000
-
-# Or on Windows:
-RUN-AXIOM.bat
 ```
 
-### Production build
+Application runs at `http://localhost:3000`.
+
+### Production
 
 ```bash
 npm run build
 npm start
 ```
 
----
-
-## Deploy to Vercel
-
-Vercel is the recommended host (Next.js native, zero config).
-
-### Option A — GitHub import (easiest)
-
-1. Push repo to GitHub (already at `Aasritha6/axiom`).
-2. Go to [vercel.com/new](https://vercel.com/new) → Import `Aasritha6/axiom`.
-3. **Environment Variables** (Project Settings → Environment Variables):
-
-   | Name | Value |
-   |------|-------|
-   | `ANAKIN_API_KEY` | Your Anakin key |
-   | `GEMINI_API_KEY` | Your Gemini key |
-
-4. Click **Deploy**. Vercel auto-detects Next.js.
-
-### Option B — Vercel CLI
+### Utility commands
 
 ```bash
-npm i -g vercel
-cd axiom
-vercel
-# follow prompts, then:
-vercel env add ANAKIN_API_KEY
-vercel env add GEMINI_API_KEY
-vercel --prod
+npm run recon -- --test "Byju's"   # Smoke-test all 8 Wire actions
+npm run catalog                    # Fetch Anakin Wire catalog
 ```
-
-### Deployment notes
-
-| Topic | Detail |
-|-------|--------|
-| **SSE timeout** | Live Wire scans can take 30–60s. Route sets `maxDuration = 60`. Use **📦 CACHED** for judging if live scan times out on Hobby tier. |
-| **Wire cache** | In-memory (2h TTL). Resets on cold start — safe for serverless, no filesystem needed. |
-| **Secrets** | Never commit `.env.local`. Set vars in Vercel dashboard only. |
-| **SSL** | Vercel handles HTTPS automatically. |
-
-### Troubleshooting deploy
-
-| Issue | Fix |
-|-------|-----|
-| Build fails on Vercel | Run `npm run build` locally first; fix TypeScript errors |
-| Live scan returns empty | Check `ANAKIN_API_KEY` in Vercel env vars; redeploy |
-| Gemini prose missing | Add `GEMINI_API_KEY`; without it, rule-based explanation still works |
-| `UNABLE_TO_VERIFY_LEAF_SIGNATURE` locally | `npm install --strict-ssl=false` (corporate proxy) |
-| Stream cuts off at 10s | Upgrade Vercel plan or use cached demo mode |
 
 ---
 
-## 60-Second Demo Script (for judges)
+## Deployment
 
-1. **Open app** → show terminal UI, 8-source header.
-2. **Click Byju's → 📦 CACHED** → narrative panel fills (480 articles), reality shows NCLT/ layoffs → **HYPE DOMINATES** + red Δ-Sigma gauge.
-3. **Click Cursor → 📦 CACHED** → quiet narrative, 340 GitHub repos → **REALITY EXCEEDS HYPE** (green gauge).
-4. **Click Humane → ⚡ RUN LIVE** → show LIVE badges streaming in, skeleton cards disappearing per source.
-5. **COPY VERDICT** → paste Gemini synthesis with `ESTIMATED RISK EXPOSURE`.
-6. Mention: *"Eight parallel Anakin Wire actions, rule-based scoring, optional Gemini — no Claude credits burned."*
+Axiom is a standard Next.js application and deploys to [Vercel](https://vercel.com) without additional configuration.
+
+1. Import the repository from GitHub (`Aasritha6/axiom`).
+2. Set environment variables `ANAKIN_API_KEY` and `GEMINI_API_KEY` in the project settings.
+3. Deploy.
+
+The SSE route is configured with `runtime = "nodejs"` and `maxDuration = 60` for long-running Wire polls. Live scans typically complete in 30–60 seconds across eight parallel sources.
 
 ---
 
@@ -223,42 +278,41 @@ vercel --prod
 ```
 axiom/
 ├── app/
-│   ├── page.tsx                 # Terminal UI + EventSource client
+│   ├── page.tsx                    # Terminal shell + EventSource client
 │   ├── layout.tsx
-│   └── api/axiom/stream/        # SSE dispatcher
+│   └── api/axiom/stream/route.ts   # SSE orchestrator
 ├── components/
-│   ├── VerdictMatrix.tsx        # Δ-Sigma gauge + copy button
-│   ├── NarrativePanel.tsx       # Left brain
-│   ├── RealityPanel.tsx         # Right brain
-│   ├── FeaturedCarousel.tsx     # Cached + Live buttons
-│   └── SourceCard.tsx           # LIVE / FAILED / evidence links
+│   ├── VerdictMatrix.tsx           # Δ-Sigma gauge, verdict display
+│   ├── NarrativePanel.tsx            # Left hemisphere
+│   ├── RealityPanel.tsx            # Right hemisphere
+│   ├── FeaturedCarousel.tsx        # Demo query selector
+│   ├── SourceCard.tsx              # Per-wire result card
+│   ├── FailedWireCard.tsx          # Error state card
+│   ├── DeltaSigmaGauge.tsx         # Visual divergence meter
+│   └── WireSkeletonCard.tsx          # Streaming placeholder
 ├── lib/
-│   ├── anakin.ts                # Wire poller + fallbacks
-│   ├── extractors.ts            # Keyword sentiment + URL extraction
-│   ├── discrepancy.ts           # Verdict engine
-│   ├── demo-data.ts             # Curated demo matrices
-│   ├── gemini.ts                # Optional synthesis
-│   └── wire-cache.ts            # In-memory 2h cache
-├── config/wire-actions.json     # Verified action IDs
-└── scripts/recon.js             # Wire smoke tests
+│   ├── anakin.ts                   # Wire client + fallbacks
+│   ├── extractors.ts               # Sentiment + evidence extraction
+│   ├── discrepancy.ts              # Verdict engine
+│   ├── demo-data.ts                # Curated demo matrices
+│   ├── gemini.ts                   # Optional LLM synthesis
+│   ├── wire-cache.ts               # In-memory response cache
+│   └── config/sources.ts           # Wire source registry
+├── config/wire-actions.json        # Verified action IDs
+└── scripts/
+    ├── recon.js                    # Wire smoke tests
+    └── fetch-catalog.js            # Catalog discovery
 ```
-
----
-
-## Scripts
-
-| Command | Description |
-|---------|-------------|
-| `npm run dev` | Development server |
-| `npm run build` | Production build |
-| `npm start` | Run production server |
-| `npm run recon -- --test "Tesla"` | Smoke-test 8 Wire actions |
-| `npm run catalog` | Fetch full Anakin Wire catalog |
 
 ---
 
 ## License
 
-MIT — built for the Anakin Build-a-thon 2026.
+MIT License — Anakin Build-a-thon 2026.
 
-**Built by Aasritha** · Powered by [Anakin.io Wire](https://anakin.io)
+---
+
+<p align="center">
+  <strong>Axiom</strong> — because the story and the substance are rarely the same.<br/>
+  Built by <a href="https://github.com/Aasritha6">Aasritha</a> · Powered by <a href="https://anakin.io">Anakin.io Wire</a>
+</p>
