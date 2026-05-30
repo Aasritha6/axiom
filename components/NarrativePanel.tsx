@@ -25,19 +25,19 @@ export function NarrativePanel({
   searchQuery,
 }: Props) {
   return (
-    <section className="flex h-full min-h-[400px] flex-col border-r border-[#333] lg:min-h-0">
-      <header className="border-b border-[#333] px-3 py-2">
-        <h2 className="text-xs font-bold tracking-widest text-[#00ff41]">
+    <section className="flex h-full min-h-[400px] flex-col border-r border-[#3a3a3a] lg:min-h-0">
+      <header className="border-b border-[#3a3a3a] px-3 py-2.5">
+        <h2 className="text-sm font-bold tracking-widest text-[#3dff7a]">
           📢 NARRATIVE MATRIX
         </h2>
-        <p className="text-[9px] text-[#555]">
+        <p className="text-xs text-[#9a9a9a]">
           LEFT BRAIN · Google News · Social · Related
         </p>
       </header>
 
       <div className="scrollbar-thin flex-1 space-y-2 overflow-y-auto p-3">
         {cards.length === 0 && !isStreaming && (
-          <p className="text-[10px] text-[#444]">
+          <p className="text-sm text-[#7a7a7a]">
             Awaiting query — narrative wires idle
           </p>
         )}

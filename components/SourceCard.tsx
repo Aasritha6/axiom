@@ -58,8 +58,8 @@ export function SourceCard({
     ? "wire-card wire-card-amber card-arrive"
     : "wire-card card-arrive";
   const labelClass = isAmber
-    ? "t-label text-[#ffb000]"
-    : "t-label text-[#00ff41]";
+    ? "t-label text-[#ffc84d]"
+    : "t-label text-[#3dff7a]";
 
   const sourceUrl = primaryEvidenceUrl(
     card.wireId,
@@ -83,7 +83,7 @@ export function SourceCard({
       </div>
 
       {card.label && (
-        <p className="mb-1.5 text-[9px] tracking-wider text-[#444]">
+        <p className="mb-1.5 text-xs tracking-wider text-[#7a7a7a]">
           {card.label}
         </p>
       )}
