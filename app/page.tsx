@@ -222,30 +222,30 @@ export default function Home() {
   };
 
   return (
-    <main className="flex min-h-screen flex-col bg-black text-[#3dff7a]">
-      <header className="border-b border-[#3a3a3a] px-3 py-3 sm:px-4">
+    <main className="flex min-h-screen flex-col bg-black text-[#00ff41]">
+      <header className="border-b border-[#333] px-3 py-3 sm:px-4">
         <div className="flex flex-col gap-3 lg:flex-row lg:flex-wrap lg:items-center lg:justify-between">
           <div className="shrink-0">
-            <h1 className="text-xl font-bold tracking-widest text-[#3dff7a]">
+            <h1 className="text-lg font-bold tracking-widest text-[#00ff41]">
               ◈ AXIOM
             </h1>
-            <p className="text-xs tracking-wider text-[#9a9a9a]">
+            <p className="text-[10px] tracking-wider text-[#666]">
               NARRATIVE vs. GROUND TRUTH · FORENSIC TERMINAL v0.3
             </p>
             {(isStreaming || allCards.length > 0) && (
-              <p className="mt-1 text-[11px] text-[#ffc84d]">
+              <p className="mt-1 text-[9px] text-[#ffb000]">
                 {sourceStats.total} sources · {sourceStats.resolved} resolved
                 {sourceStats.failed > 0 && (
                   <>
                     {" "}
                     ·{" "}
-                    <span className="text-[#ff5c5c]">
+                    <span className="text-[#ff3333]">
                       {sourceStats.failed} failed
                     </span>
                   </>
                 )}
                 {" · "}
-                <span className="text-[#3dff7a]">{sourceStats.live} live</span>
+                <span className="text-[#00ff41]">{sourceStats.live} live</span>
                 {sourceStats.fallback > 0 && (
                   <> · {sourceStats.fallback} fallback</>
                 )}
@@ -277,12 +277,12 @@ export default function Home() {
                   setQuery(e.target.value);
                 }}
                 placeholder="Try: Byju's, Cursor, Humane AI Pin…"
-                className="min-w-0 flex-1 border border-[#3a3a3a] bg-[#0a0a0a] px-3 py-2.5 text-sm text-[#e8e8e8] placeholder-[#6a6a6a] outline-none focus:border-[#3dff7a] sm:py-2"
+                className="min-w-0 flex-1 border border-[#333] bg-black px-3 py-2 text-sm text-[#00ff41] placeholder-[#444] outline-none focus:border-[#00ff41] sm:py-1.5"
               />
               <button
                 type="submit"
                 disabled={isStreaming}
-                className="shrink-0 bg-[#3dff7a] px-5 py-2.5 text-sm font-bold tracking-wider text-black hover:bg-[#5dff92] disabled:opacity-40 sm:py-2"
+                className="shrink-0 bg-[#00ff41] px-4 py-2 text-xs font-bold tracking-wider text-black hover:bg-[#33ff66] disabled:opacity-40 sm:py-1.5"
               >
                 {isStreaming ? "SCANNING…" : "RUN LIVE"}
               </button>

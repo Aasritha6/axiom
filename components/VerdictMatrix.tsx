@@ -31,8 +31,8 @@ function SignalBar({
 
   return (
     <div className="mb-3">
-      <div className="mb-1 flex justify-between text-[11px]">
-        <span className="text-[#9a9a9a]">{label}</span>
+      <div className="mb-1 flex justify-between text-[9px]">
+        <span className="text-[#666]">{label}</span>
         <span style={{ color }}>
           {"↑".repeat(counts.bullish)}
           {"↓".repeat(counts.bearish)}
@@ -54,11 +54,11 @@ function SignalBar({
 }
 
 function riskColor(risk: string): string {
-  if (risk === "EXTREME") return "#ff5c5c";
-  if (risk === "MODERATE") return "#ffc84d";
-  if (risk === "UNDERVALUED") return "#3dff7a";
-  if (risk === "PARTIAL") return "#9a9a9a";
-  return "#3dff7a";
+  if (risk === "EXTREME") return "#ff3333";
+  if (risk === "MODERATE") return "#ffb000";
+  if (risk === "UNDERVALUED") return "#00ff41";
+  if (risk === "PARTIAL") return "#666";
+  return "#00ff41";
 }
 
 export function VerdictMatrix({ verdict, isStreaming, activeQuery }: Props) {
@@ -89,25 +89,25 @@ export function VerdictMatrix({ verdict, isStreaming, activeQuery }: Props) {
   }, [verdict, activeQuery]);
 
   return (
-    <section className="flex min-h-[300px] flex-col border-x border-[#3a3a3a] bg-[#050505] lg:min-h-0">
-      <header className="border-b border-[#3a3a3a] px-3 py-2.5 text-center">
-        <h2 className="text-sm font-bold tracking-widest text-[#e8e8e8]">
+    <section className="flex min-h-[300px] flex-col border-x border-[#333] bg-[#050505] lg:min-h-0">
+      <header className="border-b border-[#333] px-3 py-2 text-center">
+        <h2 className="text-xs font-bold tracking-widest text-white">
           🎯 FORENSIC SYNTHESIS
         </h2>
-        <p className="text-[11px] text-[#9a9a9a]">VERDICT MATRIX</p>
+        <p className="text-[9px] text-[#555]">VERDICT MATRIX</p>
       </header>
 
       <div className="flex flex-1 flex-col items-center justify-center p-4 text-center">
         {!verdict && !isStreaming && (
-          <p className="text-sm text-[#7a7a7a]">
+          <p className="text-[10px] text-[#444]">
             {activeQuery ? "Computing…" : "No active scan"}
           </p>
         )}
 
         {isStreaming && !verdict && (
           <div className="pulse-live">
-            <p className="text-sm text-[#3dff7a]">◈ SYNTHESIZING</p>
-            <p className="mt-1 text-xs text-[#9a9a9a]">{activeQuery}</p>
+            <p className="text-[10px] text-[#00ff41]">◈ SYNTHESIZING</p>
+            <p className="mt-1 text-[9px] text-[#555]">{activeQuery}</p>
           </div>
         )}
 
@@ -115,26 +115,26 @@ export function VerdictMatrix({ verdict, isStreaming, activeQuery }: Props) {
           <div className="w-full">
             <div className="mb-2 flex items-center justify-between">
               {verdict.isCached ? (
-                <span className="text-[10px] text-[#ffc84d]">📦 CURATED DEMO</span>
+                <span className="text-[8px] text-[#ffb000]">📦 CURATED DEMO</span>
               ) : (
-                <span className="text-[10px] text-[#3dff7a]">⚡ LIVE SCAN</span>
+                <span className="text-[8px] text-[#00ff41]">⚡ LIVE SCAN</span>
               )}
               <button
                 type="button"
                 onClick={copyVerdict}
-                className="border border-[#3a3a3a] px-2 py-1 text-[10px] tracking-wider text-[#b4b4b4] hover:border-[#3dff7a] hover:text-[#3dff7a]"
+                className="border border-[#333] px-2 py-0.5 text-[8px] tracking-wider text-[#888] hover:border-[#00ff41] hover:text-[#00ff41]"
               >
                 {copied ? "COPIED ✓" : "COPY VERDICT"}
               </button>
             </div>
 
             <p
-              className="mb-1 text-base font-bold tracking-wide"
+              className="mb-1 text-sm font-bold tracking-wide"
               style={{ color: riskColor(verdict.riskLevel) }}
             >
               {verdict.verdictLabel}
             </p>
-            <p className="mb-3 text-xs text-[#9a9a9a]">
+            <p className="mb-3 text-[9px] text-[#666]">
               RISK: {verdict.riskLevel} · CONF: {verdict.confidence}%
             </p>
 
@@ -145,58 +145,58 @@ export function VerdictMatrix({ verdict, isStreaming, activeQuery }: Props) {
             <SignalBar
               label="NARRATIVE MOMENTUM"
               counts={verdict.narrative.counts}
-              color="#3dff7a"
+              color="#00ff41"
             />
             <SignalBar
               label="REALITY MOMENTUM"
               counts={verdict.reality.counts}
-              color="#ffc84d"
+              color="#ffb000"
             />
 
-            <div className="my-3 border border-[#3a3a3a] p-3">
-              <p className="text-[11px] text-[#9a9a9a]">SIGNAL GAP</p>
-              <p className="text-xl font-bold text-[#e8e8e8]">
+            <div className="my-3 border border-[#333] p-2">
+              <p className="text-[9px] text-[#555]">SIGNAL GAP</p>
+              <p className="text-lg font-bold text-white">
                 {verdict.signalGap > 0 ? "+" : ""}
                 {verdict.signalGap}
               </p>
-              <p className="text-[10px] text-[#7a7a7a]">
+              <p className="text-[8px] text-[#444]">
                 narrative bullish − reality bullish
               </p>
             </div>
 
-            <div className="border-t border-[#2a2a2a] pt-2 text-left">
-              <p className="mb-1 text-[11px] text-[#9a9a9a]">RAW VOLUME</p>
-              <div className="flex justify-between text-xs">
-                <span className="text-[#3dff7a]">
+            <div className="border-t border-[#222] pt-2 text-left">
+              <p className="mb-1 text-[9px] text-[#555]">RAW VOLUME</p>
+              <div className="flex justify-between text-[9px]">
+                <span className="text-[#00ff41]">
                   N: {verdict.narrative.totalVolume}
                 </span>
-                <span className="text-[#ffc84d]">
+                <span className="text-[#ffb000]">
                   R: {verdict.reality.totalVolume}
                 </span>
               </div>
             </div>
 
-            <div className="mt-3 border border-[#2a2a2a] bg-[#0a0a0a] p-3 text-left">
+            <div className="mt-3 border border-[#222] bg-[#0a0a0a] p-2 text-left">
               <div className="mb-1 flex items-center justify-between gap-2">
-                <p className="text-[10px] tracking-wider text-[#ffc84d]">
+                <p className="text-[8px] tracking-wider text-[#ffb000]">
                   FORENSIC SYNTHESIS
                 </p>
                 {verdict.narrativeMode === "ai-grounded" ? (
-                  <span className="rounded border border-[#3dff7a]/40 bg-[#3dff7a]/10 px-2 py-0.5 text-[10px] tracking-wider text-[#3dff7a]">
-                    AI-grounded
+                  <span className="rounded border border-[#00ff41]/40 bg-[#00ff41]/10 px-1.5 py-0.5 text-[7px] tracking-wider text-[#00ff41]">
+                    AI-grounded narrative
                   </span>
                 ) : (
-                  <span className="rounded border border-[#555] bg-[#141414] px-2 py-0.5 text-[10px] tracking-wider text-[#9a9a9a]">
-                    Rule-based
+                  <span className="rounded border border-[#444] bg-[#111] px-1.5 py-0.5 text-[7px] tracking-wider text-[#666]">
+                    Rule-based fallback
                   </span>
                 )}
               </div>
-              <p className="text-xs leading-relaxed text-[#d4d4d4]">
+              <p className="text-[9px] leading-relaxed text-[#ccc]">
                 {verdict.aiExplanation ?? verdict.explanation}
               </p>
               {verdict.narrativeMode === "ai-grounded" && (
-                <p className="mt-2 text-[10px] text-[#7a7a7a]">
-                  Verdict &amp; Δ-Sigma are rule-based · prose cites wire facts only
+                <p className="mt-2 text-[8px] text-[#555]">
+                  Verdict class &amp; Δ-Sigma are rule-based · prose cites wire facts only
                 </p>
               )}
             </div>

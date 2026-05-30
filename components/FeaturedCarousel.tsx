@@ -16,26 +16,26 @@ export function FeaturedCarousel({
   disabled,
 }: Props) {
   return (
-    <div className="mt-3 border-t border-[#2a2a2a] pt-3">
-      <p className="mb-2 text-xs tracking-widest text-[#ffc84d]">
-        ▶ FEATURED QUERIES
+    <div className="mt-3 border-t border-[#222] pt-3">
+      <p className="mb-2 text-[10px] tracking-widest text-[#ffb000]">
+        ▶ FEATURED QUERIES — CURATED DEMO MATRICES
       </p>
       <div className="flex flex-wrap gap-2">
         {queries.map((q) => (
           <div
             key={q.id}
-            className="group border border-[#3a3a3a] bg-[#0a0a0a] px-3 py-2.5 transition-colors hover:border-[#555]"
+            className="group border border-[#333] bg-[#0a0a0a] px-3 py-2 transition-colors hover:border-[#444]"
           >
-            <span className="block text-sm font-bold text-[#ffc84d] group-hover:text-[#ffe08a]">
+            <span className="block text-xs font-bold text-[#ffb000] group-hover:text-[#ffd060]">
               {q.label}
             </span>
-            <span className="block text-xs text-[#9a9a9a]">{q.tagline}</span>
-            <div className="mt-2 flex flex-wrap gap-1.5">
+            <span className="block text-[9px] text-[#555]">{q.tagline}</span>
+            <div className="mt-2 flex flex-wrap gap-1">
               <button
                 type="button"
                 disabled={disabled}
                 onClick={() => onSelectCached(q.id, q.label)}
-                className="border border-[#3a3a3a] bg-[#141414] px-2.5 py-1 text-[10px] tracking-wider text-[#b4b4b4] hover:border-[#666] hover:text-[#e8e8e8] disabled:opacity-40"
+                className="border border-[#2a2a2a] bg-[#111] px-2 py-0.5 text-[8px] tracking-wider text-[#666] hover:border-[#555] hover:text-[#999] disabled:opacity-40"
                 title="Instant curated matrix — no Wire API calls"
               >
                 📦 CACHED
@@ -44,7 +44,7 @@ export function FeaturedCarousel({
                 type="button"
                 disabled={disabled}
                 onClick={() => onSelectLive(q.id, q.label)}
-                className="border border-[#3dff7a] bg-[#3dff7a]/15 px-2.5 py-1 text-[10px] font-bold tracking-wider text-[#3dff7a] hover:bg-[#3dff7a]/25 disabled:opacity-40"
+                className="border border-[#00ff41] bg-[#00ff41]/15 px-2 py-0.5 text-[8px] font-bold tracking-wider text-[#00ff41] hover:bg-[#00ff41]/25 disabled:opacity-40"
                 title="Full Wire pipeline + Gemini narrative"
               >
                 ⚡ RUN LIVE
