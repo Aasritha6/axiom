@@ -50,7 +50,7 @@ Built for the **Anakin Build-a-thon** · Next.js 15 · TypeScript · Vercel
 
 ---
 
-## What judges see on the live app
+## What we see on the live app
 
 | Experience | Behavior |
 |------------|----------|
