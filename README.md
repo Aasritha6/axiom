@@ -1,6 +1,3 @@
-<p align="center">
-  <img src="screenshot.png" alt="Axiom forensic terminal" width="100%" />
-</p>
 
 <h1 align="center">Axiom</h1>
 
