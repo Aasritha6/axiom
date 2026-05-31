@@ -3,41 +3,38 @@
 :root {
   --axiom-black: #000000;
   --axiom-green: #00ff41;
+  --axiom-green-dim: #00cc33;
   --axiom-amber: #ffb000;
   --axiom-red: #ff3333;
   --axiom-dim: #1a1a1a;
   --axiom-border: #333333;
-  --axiom-muted: #666666;
+  --axiom-muted: #888888;
   --axiom-surface: #0d0d0d;
   --axiom-surface-2: #111111;
+  --axiom-text: #e0e0e0;
+  --axiom-text-dim: #aaaaaa;
 }
 
-* {
-  box-sizing: border-box;
-}
+* { box-sizing: border-box; }
 
-html,
-body {
+html, body {
   height: 100%;
   margin: 0;
   padding: 0;
   background: var(--axiom-black);
-  color: var(--axiom-green);
+  color: var(--axiom-text);
   font-family: "Courier New", Courier, monospace;
   font-size: 13px;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
 }
 
-/* Scan line overlay — subtle CRT texture */
 body::before {
   content: "";
   position: fixed;
   inset: 0;
   background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
+    0deg, transparent, transparent 2px,
     rgba(0, 255, 65, 0.015) 2px,
     rgba(0, 255, 65, 0.015) 4px
   );
@@ -46,14 +43,8 @@ body::before {
 }
 
 @keyframes card-arrive {
-  from {
-    opacity: 0;
-    transform: translateY(6px);
-  }
-  to {
-    opacity: 1;
-    transform: translateY(0);
-  }
+  from { opacity: 0; transform: translateY(6px); }
+  to { opacity: 1; transform: translateY(0); }
 }
 
 @keyframes pulse-glow {
@@ -72,17 +63,9 @@ body::before {
   100% { opacity: 0.3; }
 }
 
-.card-arrive {
-  animation: card-arrive 0.3s ease-out forwards;
-}
-
-.pulse-live {
-  animation: pulse-glow 1.4s ease-in-out infinite;
-}
-
-.skeleton-shimmer {
-  animation: shimmer 1.8s ease-in-out infinite;
-}
+.card-arrive { animation: card-arrive 0.3s ease-out forwards; }
+.pulse-live { animation: pulse-glow 1.4s ease-in-out infinite; }
+.skeleton-shimmer { animation: shimmer 1.8s ease-in-out infinite; }
 
 .wire-card {
   position: relative;
@@ -97,62 +80,39 @@ body::before {
   background: var(--axiom-surface-2);
 }
 
-.wire-card-amber {
-  border-color: rgba(255, 176, 0, 0.15);
-}
-
-.wire-card-amber:hover {
-  border-color: rgba(255, 176, 0, 0.35);
-}
+.wire-card-amber { border-color: rgba(255, 176, 0, 0.15); }
+.wire-card-amber:hover { border-color: rgba(255, 176, 0, 0.35); }
 
 .wire-card::before {
   content: "";
   position: absolute;
-  left: 0;
-  top: 0;
-  bottom: 0;
+  left: 0; top: 0; bottom: 0;
   width: 2px;
   background: rgba(0, 255, 65, 0.4);
 }
 
-.wire-card-amber::before {
-  background: rgba(255, 176, 0, 0.4);
-}
+.wire-card-amber::before { background: rgba(255, 176, 0, 0.4); }
 
 .t-label {
   font-size: 11px;
   font-weight: 700;
   letter-spacing: 0.08em;
   text-transform: uppercase;
+  color: var(--axiom-text);
 }
 
-.t-summary {
-  font-size: 11px;
-  color: #aaa;
-  line-height: 1.5;
-}
-
-.t-metric-label {
-  font-size: 10px;
-  color: #666;
-}
-
-.t-metric-value {
-  font-size: 10px;
-  color: #bbb;
-  font-weight: 600;
-}
+.t-summary { font-size: 11px; color: var(--axiom-text-dim); line-height: 1.5; }
+.t-metric-label { font-size: 10px; color: var(--axiom-muted); }
+.t-metric-value { font-size: 10px; color: var(--axiom-text); font-weight: 600; }
 
 .t-evidence {
   font-size: 10px;
-  color: #00ff41;
+  color: var(--axiom-green-dim);
   text-decoration: underline;
   text-underline-offset: 2px;
 }
 
-.t-evidence:hover {
-  color: #ffb000;
-}
+.t-evidence:hover { color: var(--axiom-amber); }
 
 .metric-row {
   display: flex;
@@ -162,13 +122,11 @@ body::before {
   border-bottom: 1px solid rgba(255, 255, 255, 0.03);
 }
 
-.metric-row:last-child {
-  border-bottom: none;
-}
+.metric-row:last-child { border-bottom: none; }
 
 .signal-bullish { color: #00ff41; font-weight: 700; }
 .signal-bearish { color: #ff3333; font-weight: 700; }
-.signal-neutral { color: #666; font-weight: 700; }
+.signal-neutral { color: var(--axiom-muted); font-weight: 700; }
 
 .badge {
   display: inline-flex;
@@ -189,13 +147,13 @@ body::before {
 .badge-cached {
   border: 1px solid rgba(102, 102, 102, 0.4);
   background: rgba(255, 255, 255, 0.03);
-  color: #666;
+  color: var(--axiom-muted);
 }
 
 .badge-fallback {
   border: 1px solid rgba(255, 176, 0, 0.4);
   background: rgba(255, 176, 0, 0.07);
-  color: #ffb000;
+  color: var(--axiom-amber);
 }
 
 .badge-failed {
@@ -210,34 +168,29 @@ body::before {
   background: rgba(0, 255, 65, 0.02);
 }
 
-.panel-header-amber {
-  background: rgba(255, 176, 0, 0.02);
+.panel-header-amber { background: rgba(255, 176, 0, 0.02); }
+
+input[type="text"] {
+  color: var(--axiom-text);
+  background: var(--axiom-surface);
+  border: 1px solid var(--axiom-border);
 }
+
+input[type="text"]::placeholder { color: var(--axiom-muted); }
 
 input[type="text"]:focus {
   box-shadow: 0 0 0 1px rgba(0, 255, 65, 0.3), 0 0 8px rgba(0, 255, 65, 0.1);
+  outline: none;
 }
 
 button:not(:disabled):hover {
   box-shadow: 0 0 6px rgba(0, 255, 65, 0.15);
 }
 
-.scrollbar-thin::-webkit-scrollbar {
-  width: 3px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-track {
-  background: transparent;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb {
-  background: #222;
-  border-radius: 2px;
-}
-
-.scrollbar-thin::-webkit-scrollbar-thumb:hover {
-  background: #333;
-}
+.scrollbar-thin::-webkit-scrollbar { width: 3px; }
+.scrollbar-thin::-webkit-scrollbar-track { background: transparent; }
+.scrollbar-thin::-webkit-scrollbar-thumb { background: #222; border-radius: 2px; }
+.scrollbar-thin::-webkit-scrollbar-thumb:hover { background: #333; }
 
 .failed-card {
   background: #0f0404;
