@@ -17,212 +17,6 @@
 }
 
 html,
-:...skipping...
-@import "tailwindcss";
-
-:root {
-  --axiom-black: #000000;
-  --axiom-green: #00ff41;
-  --axiom-amber: #ffb000;
-  --axiom-red: #ff3333;
-  --axiom-dim: #1a1a1a;
-  --axiom-border: #333333;
-  --axiom-muted: #666666;
-  --axiom-surface: #0d0d0d;
-  --axiom-surface-2: #111111;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background: var(--axiom-black);
-  color: var(--axiom-green);
-  font-family: "Courier New", Courier, monospace;
-  font-size: 13px;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* Scan line overlay — subtle CRT texture */
-:...skipping...
-@import "tailwindcss";
-
-:root {
-  --axiom-black: #000000;
-  --axiom-green: #00ff41;
-  --axiom-amber: #ffb000;
-  --axiom-red: #ff3333;
-  --axiom-dim: #1a1a1a;
-  --axiom-border: #333333;
-  --axiom-muted: #666666;
-  --axiom-surface: #0d0d0d;
-  --axiom-surface-2: #111111;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background: var(--axiom-black);
-  color: var(--axiom-green);
-  font-family: "Courier New", Courier, monospace;
-  font-size: 13px;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* Scan line overlay — subtle CRT texture */
-body::before {
-:...skipping...
-@import "tailwindcss";
-
-:root {
-  --axiom-black: #000000;
-  --axiom-green: #00ff41;
-  --axiom-amber: #ffb000;
-  --axiom-red: #ff3333;
-  --axiom-dim: #1a1a1a;
-  --axiom-border: #333333;
-  --axiom-muted: #666666;
-  --axiom-surface: #0d0d0d;
-  --axiom-surface-2: #111111;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background: var(--axiom-black);
-  color: var(--axiom-green);
-  font-family: "Courier New", Courier, monospace;
-  font-size: 13px;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* Scan line overlay — subtle CRT texture */
-body::before {
-  content: "";
-  position: fixed;
-:...skipping...
-@import "tailwindcss";
-
-:root {
-  --axiom-black: #000000;
-  --axiom-green: #00ff41;
-  --axiom-amber: #ffb000;
-  --axiom-red: #ff3333;
-  --axiom-dim: #1a1a1a;
-  --axiom-border: #333333;
-  --axiom-muted: #666666;
-  --axiom-surface: #0d0d0d;
-  --axiom-surface-2: #111111;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background: var(--axiom-black);
-  color: var(--axiom-green);
-  font-family: "Courier New", Courier, monospace;
-  font-size: 13px;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* Scan line overlay — subtle CRT texture */
-body::before {
-  content: "";
-  position: fixed;
-  inset: 0;
-:...skipping...
-@import "tailwindcss";
-
-:root {
-  --axiom-black: #000000;
-  --axiom-green: #00ff41;
-  --axiom-amber: #ffb000;
-  --axiom-red: #ff3333;
-  --axiom-dim: #1a1a1a;
-  --axiom-border: #333333;
-  --axiom-muted: #666666;
-  --axiom-surface: #0d0d0d;
-  --axiom-surface-2: #111111;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
-body {
-  height: 100%;
-  margin: 0;
-  padding: 0;
-  background: var(--axiom-black);
-  color: var(--axiom-green);
-  font-family: "Courier New", Courier, monospace;
-  font-size: 13px;
-  -webkit-font-smoothing: antialiased;
-  text-rendering: optimizeLegibility;
-}
-
-/* Scan line overlay — subtle CRT texture */
-body::before {
-  content: "";
-  position: fixed;
-inset: 0;
-  background: repeating-linear-gradient(
-    0deg,
-    transparent,
-    transparent 2px,
-    rgba(0, 255, 65, 0.015) 2px,
-    rgba(0, 255, 65, 0.015) 4px
-  );
-  pointer-events: none;
-  z-index: 9999;
-}
-@import "tailwindcss";
-
-:root {
-  --axiom-black: #000000;
-  --axiom-green: #00ff41;
-  --axiom-amber: #ffb000;
-  --axiom-red: #ff3333;
-  --axiom-dim: #1a1a1a;
-  --axiom-border: #333333;
-  --axiom-muted: #666666;
-  --axiom-surface: #0d0d0d;
-  --axiom-surface-2: #111111;
-}
-
-* {
-  box-sizing: border-box;
-}
-
-html,
 body {
   height: 100%;
   margin: 0;
@@ -272,12 +66,22 @@ body::before {
   50% { border-color: rgba(0, 255, 65, 0.6); }
 }
 
+@keyframes shimmer {
+  0% { opacity: 0.3; }
+  50% { opacity: 0.6; }
+  100% { opacity: 0.3; }
+}
+
 .card-arrive {
   animation: card-arrive 0.3s ease-out forwards;
 }
 
 .pulse-live {
   animation: pulse-glow 1.4s ease-in-out infinite;
+}
+
+.skeleton-shimmer {
+  animation: shimmer 1.8s ease-in-out infinite;
 }
 
 .wire-card {
@@ -433,16 +237,6 @@ button:not(:disabled):hover {
 
 .scrollbar-thin::-webkit-scrollbar-thumb:hover {
   background: #333;
-}
-
-@keyframes shimmer {
-  0% { opacity: 0.3; }
-  50% { opacity: 0.6; }
-  100% { opacity: 0.3; }
-}
-
-.skeleton-shimmer {
-  animation: shimmer 1.8s ease-in-out infinite;
 }
 
 .failed-card {
