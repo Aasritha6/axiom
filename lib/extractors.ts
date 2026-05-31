@@ -93,8 +93,24 @@ const TEXT_FIELD_KEYS = new Set([
   "caption",
   "review",
   "comment",
+  "content_text",
+  "full_text",
+  "article_body",
+  "post_body",
+  "message",
+  "tweet",
+  "post",
+  "transcript",
+  "abstract",
+  "excerpt",
+  "preview",
+  "subtitle",
+  "tagline",
+  "bio",
+  "about",
+  "overview",
+  "details",
 ]);
-
 export function collectReadableText(data: unknown, depth = 0): string {
   if (depth > 8) return "";
   if (typeof data === "string") return data;
