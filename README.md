@@ -407,6 +407,15 @@ The SSE route runs on Node.js with `maxDuration = 60`. Live scans typically comp
 - Rules decide, LLM narrates — scoring integrity preserved even when Gemini is enabled
 
 ---
+## Production Hardening Roadmap
+
+While Axiom is optimized for high-performance delivery in a demo environment, transitioning this terminal into a commercial enterprise tier would involve the following architectural upgrades:
+
+1. **Persistent Global Caching (Redis / Vercel KV):** The current implementation utilizes an aggressive 2-hour in-memory cache layer (`lib/wire-cache.ts`). Moving this state to a distributed cache like Upstash Redis would preserve cache hits across serverless cold starts and minimize redundant billing costs on downstream Anakin Wire pipelines.
+2. **Token-Bucket Rate Limiting:** To prevent malicious key exhaustion of the underlying scraping infrastructure, protect the `/api/axiom/stream` SSE route via an edge middleware rate-limiter using Vercel KV.
+3. **Deterministic Unit Testing:** While `npm run recon` provides an integration smoke test for live endpoints, a comprehensive Jest/Vitest suite covering `lib/extractors.ts` and `lib/discrepancy.ts` would ensure total parsing immutability against format drift in raw wire responses.
+4. **Data Calibration & Parameter Tuning:** The narrative/reality weights ($W_i=0.6$, $W_j=1.4$) and semantic keyword thresholds ($0.12$) are based on empirical historical backtesting of legendary hype collapses (e.g., WeWork, Humane). Future iterations will introduce automated calibration using historical market cap divergence datasets.
+---
 
 ## License
 
